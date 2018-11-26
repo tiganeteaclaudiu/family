@@ -16,18 +16,29 @@ app.config.from_object(Config)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-from app.models import User, Post
+from app.models import User, Family, Families
 
-# u = User(username='claudiu',email='claudiu@gmail.com')
+# u = User(username='claudiu10',email='claudiu10@gmail.com',password='claudiu')
+# v = User(username='claudiu9',email='claudiu11@gmail.com',password='claudiu')
+# w = User(username='claudiu8',email='claudiu12@gmail.com',password='claudiu')
+# f = Family(name='tiganetea4')
+
+# f.members.append(u)
+# f.members.append(v)
+# f.members.append(w)
+
+# db.session.add(f)
+# db.session.commit()
+
 # v = User(username='susan', email='susan@example.com')
 # db.session.add(u)
 # db.session.add(v)
 # db.session.commit()
-try:
-	users = User.query.all()
-	for user in users:
-		user.dump()
-except Exception as e:
-	print(e)
+# try:
+# 	users = User.query.all()
+# 	for user in users:
+# 		user.dump()
+# except Exception as e:
+# 	print(e)
 
 from app import routes

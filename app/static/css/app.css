@@ -36,10 +36,104 @@ body, html {
 	left: 0;
 }
 
-#content {
+#content-container {
 	width: 100%;
 	height: 80%;
 	background-color: #fdfff7;
+	display: flex;
+	justify-content: flex-end;
+}
+
+#content {
+	width: 85%;
+	height: 100%;
+	position: relative;
+	display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.content-2col {
+
+    align-self: center;
+    margin: auto;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+
+}
+
+.content-2col-col {
+	width: 50%;
+	height: 100%;
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	flex-direction: column;
+}
+
+#content-header-container {
+	width: 100%;
+	height: 100px;
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	padding-left: 2%;
+	position: absolute;
+}
+
+#content-header {
+	margin: 0;
+	color: black;
+	font-family: arial;
+	font-size: 2rem;
+}
+
+.content-header-icon {
+	margin-right: 1%;
+	font-size: 1.5rem;
+}
+
+#no-family-image {
+	align-self: center;
+	margin: auto;
+	margin-left: 10%;
+}
+
+#no-family-button-container {
+	width: 100%;
+	height: 7%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-top: 4%;
+}
+
+.no-family-button {
+	width: 20%;
+	height: 100%;
+	background-color: red;
+	margin: 5%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border-radius: 5px;
+}
+
+.no-family-button p {
+	margin: 0;
+	color: white;
+	font-family: arial;
+	font-weight: bold;
+	font-size: 1.7rem;
+}
+
+#logo-credit p {
+	font-size: 0.6rem;
 }
 
 #footer {
@@ -171,6 +265,54 @@ body, html {
 }
 
 #login-submit {
+	width: 43%;
+	height: 40px;
+	background-color: #fed766;
+	margin-top: 7%;
+	border-radius: 5px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	cursor: pointer;
+	color: #f85a3e;
+	font-size: 1.2rem;
+
+}
+
+#family-container {
+	width: 30%;
+	height: 80%;
+	border: 1px solid #fed766;
+	border-radius: 9px;
+	margin-bottom: 4%;
+	padding: 1%;
+	display: flex;
+	justify-content: center;
+	flex-direction: column;
+	position: relative;
+	align-items: center;
+	padding-left: 4%;
+	padding-right: 4%;
+	max-width: 500px;
+	max-height: 594px;
+}
+
+.family-input {
+	background-color: #f85a3e;
+	border: none;
+	border-bottom: 2px solid #fed766;
+	width: 100%;
+	margin-bottom: 7%;
+	color: #fed766;
+}
+
+.family-input-header {
+	align-self: flex-start;
+	font-size: 1.3rem;
+	margin-bottom: 0.3rem;
+}
+
+#family-submit {
 	width: 43%;
 	height: 40px;
 	background-color: #fed766;

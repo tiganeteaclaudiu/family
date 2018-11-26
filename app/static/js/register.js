@@ -33,4 +33,30 @@ $("#register-submit").click(function(){
 	});
 });
 
+$("#family-submit").click(function(){
+	console.log('Submitted data.');
+	username = $("#user-username");
+	family = $("#family-name");
+	submit = $("#family-submit");
+
+	data = JSON.stringify({
+		'username' : username.val(),
+		'family' : family.val()
+	});
+
+	$.ajax({
+		url: '/add_family_member/',
+		method: 'POST',
+		data: data,
+		success: function(data) {
+			console.log('add_family_member success');
+			// data = JSON.parse(data);
+			// if(data['status'] === 'success') {
+			// 	window.location.href = '../index/';
+			// }
+			// else console.log("Register failed");
+		}
+	});
+});
+
 });

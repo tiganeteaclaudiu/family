@@ -1,7 +1,7 @@
 from app import app
 from app import db
 from flask import render_template,request, session, redirect, url_for
-from app.models import User
+from app.models import User, Family
 from functools import wraps
 import json
 
@@ -61,6 +61,10 @@ def post_register():
 def login():
 	return render_template('login.html')
 
+@app.route('/family/')
+def family():
+	return render_template('family.html')
+
 @app.route('/post_login/',methods=['POST'])
 def post_login():
 	try:
@@ -97,4 +101,37 @@ def post_login():
 			'status' : 'failure'
 			})
 
-		
+@app.route('/add_family_member/',methods=['POST'])
+def add_family_member():
+	JSONstring = json.dumps(request.get_json(force=True))
+	data = json.loads(JSONstring)
+	
+	username = data['username']
+	family_name = data['family']
+
+	print('add_family_member username = {} -- family_name = {}||'.format(username,family_name))
+
+	family = ''
+	user = ''
+
+	try:
+		try:
+			family = Family.query.filter_by(name=family_name).first()
+		except Exception as e:
+			print("add_family_member family query failed. {}".format(e))
+
+		try:
+			user = User.query.filter_by(username=username).first()
+		except Exception as e:
+			print("add_family_member user query failed.")
+
+		family.members.append(user)
+		db.session.add(family)
+		db.session.commit()
+		return json.dumps({'status':'success'})
+
+	except Exception as e:
+		print('add_family_member ERROR: {}'.format(e))
+		return json.dumps({'status':'failure'})
+
+	family.members.append()
