@@ -1,0 +1,49 @@
+Application Architecture:
+
+Includes technologies that can be used to implement the desired features for this application.
+
+Desired features and their best candidate as implementation technology:
+
+	-Back-End server:
+
+		-Flask:
+			-Python-based, easy syntax, pythonic methods are easy to implement and fun to design
+			-Supports advanced routing for complex requests
+			-Very scalable because of various plugins (Mostly implemented by Miguel Grinberg)
+			-Plugin support for:
+				-Login (Flask-Login)
+				-SQLite Databases (Flask-SQLAlchemy)
+				-Easy and secure web forms (Flask-WTForms)
+				-Jinja2 engine support for web templating
+				-Email server support (Flask-Email)
+				-Web Sockets (Flask-SocketIO)
+				-More to be added as they are decided as useful
+			-Easy to deploy via Heroku or similar service
+
+	-Front-End web UI:
+
+		-HTML5, CSS, Javascript
+		-JQuery:
+			-Easy syntax, useful selectors
+			-Easy to use AJAX implementation
+			-Generally a must-have for most web projects
+		-BootStrap:
+			-Easy to implement elements that would normally take time:
+				-Modals
+				-Pagination
+				-Tooltips
+				...etc
+
+
+	-API's:
+
+		-Google Maps API:
+			-this might require the UI to either contain advertisements or implement some sort of premium user plan
+
+		-Similar location API (preferably free to use comercially)
+		-Cloud API
+		-Budgeting API
+
+
+More to be added:
+	-last update: 25 nov 2018

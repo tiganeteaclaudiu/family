@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+ <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+        <title>Family</title>
+
+        <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+
+        <link href="{{ url_for('static', filename='css/app.css') }}" rel="stylesheet">
+
+        <link href="{{ url_for('static', filename='fonts/glyphicons.css') }}" rel="stylesheet">
+
+        <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.3.1.js') }}"></script>
+
+        <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.js') }}"></script>
+
+
+    </head>
+<body>
+
+<div id='wrapper'>
+
+	<div id='header'>
+		<div id='logo-container'>
+			<img src="../static/images/logo.png" style="width: 50%;" class="img-responsive pull-right">
+		</div>
+		<div class="menu-option">
+			<span class="glyphicon glyphicon-home" aria-hidden="true"></span>
+		</div>
+		<div class="menu-option">
+			<span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span>
+		</div>
+		<div class="menu-option">
+			<span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+		</div>
+		<div class="menu-option">
+			<span class="glyphicon glyphicon-calendar" aria-hidden="true"></span>
+		</div>
+		<div class="menu-option">
+			<span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span>
+		</div>
+	</div>
+	<div id='content'>
+		<div id='side-menu'>
+		</div>
+	</div>
+	<div id='footer'></div>
+
+</div>
+
+</body>
+</html>
