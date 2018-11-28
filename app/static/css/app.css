@@ -98,6 +98,16 @@ body, html {
 	font-size: 1.5rem;
 }
 
+.content-auto-height-row {
+	width: 100%;
+	height: auto;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: row;
+	margin-top: 5%;
+}
+
 #no-family-image {
 	align-self: center;
 	margin: auto;
@@ -130,6 +140,39 @@ body, html {
 	font-family: arial;
 	font-weight: bold;
 	font-size: 1.7rem;
+}
+
+#join-family-container {
+	width: 70%;
+	height: 80%;
+	border: 1px solid gray;
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	flex-direction: column;
+}
+
+#join-family-header {
+	margin-top: 5%;
+	font-size: 2.5rem;
+	font-family: arial;
+	letter-spacing: 2px;
+}
+
+.cursor-button {
+
+    height: 47px;
+    background-color: red;
+    position: absolute;
+    border-radius: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 13px;
+    color: white;
+    font-family: arial;
+    cursor: pointer;
+
 }
 
 #logo-credit p {
@@ -199,6 +242,12 @@ body, html {
 	padding-right: 4%;
 	max-width: 500px;
 	max-height: 594px;
+}
+
+.input-styled {
+	border: none;
+	border-bottom: 2px solid black;
+	font-size: 1.5rem;
 }
 
 .register-input {
@@ -325,4 +374,31 @@ body, html {
 	color: #f85a3e;
 	font-size: 1.2rem;
 
+}
+
+/* TABLES STYLE */
+
+#families-table {
+	width: 100%;
+	height: auto;
+	margin-top: 6%;
+}
+
+#families-table tr {
+	text-align: center;
+	line-height: 35px;
+	font-size: 1.3rem;
+}
+
+#families-table th {
+	background-color: #2ad4ea;
+}
+
+#families-table tr:nth-child(even) {
+    background-color: #e8e8e8;
+}
+
+#families-table tr:hover {
+	background-color: #ffdeb7;
+	cursor: pointer;
 }

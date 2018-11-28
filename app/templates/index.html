@@ -17,6 +17,8 @@
 
         <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.js') }}"></script>
 
+        <script type="text/javascript" src="{{ url_for('static', filename='js/app.js') }}"></script>
+
 
     </head>
 <body>
@@ -51,7 +53,8 @@
 				<span class="glyphicon glyphicon-home content-header-icon" aria-hidden="true"></span>
 				<p id='content-header'>Home</p>
 			</div>
-			<div class="content-2col">
+
+			<div class="content-2col" id='content_no-family' style='display:none;'>
 				<div class='content-2col-col'>
 					<div id='no-family-image' style='margin-right:-20%;'>
 						<img src="../static/images/family.png" style="width: 70%;" class="img-responsive pull-right">
@@ -78,6 +81,59 @@
 						</div>
 					</div>
 				</div>
+			</div>
+
+			<div class="content-2col" id='content_join-family'>
+			    <div id='join-family-container'>
+			    	<h5 id="join-family-header"> Join a family! </h5>
+
+			        <div class="content-auto-height-row">
+			        	<input type="text" placeholder="Name" class='input-styled' style="width: 30%;margin-right: 5%;">
+			            <input type="text" placeholder="Location (City)" class='input-styled' style="width: 30%;margin-right: 5%;">
+			            <a><span aria-hidden="true" class="glyphicon glyphicon-search content-header-icon" style="color: #f85a3e;font-size: 2.4rem;"></span></a>
+			        </div>
+
+			        <table id="families-table">
+			            <tbody style="">
+			                <tr>
+			                    <th> ID </th>
+			                    <th> Name </th>
+			                    <th> Location </th>
+			                    <th> No. of members </th>
+			                </tr>
+			                <tr>
+			                    <td> 1233212 </td>
+			                    <td> Tiganetea </td>
+			                    <td> Cluj-Napoca, RO </td>
+			                    <td> 4 </td>
+			                </tr>
+			                <tr>
+			                    <td> 1233212 </td>
+			                    <td> Tiganetea </td>
+			                    <td> Cluj-Napoca, RO </td>
+			                    <td> 4 </td>
+			                </tr>
+			                <tr>
+			                    <td> 1233212 </td>
+			                    <td> Tiganetea </td>
+			                    <td> Cluj-Napoca, RO </td>
+			                    <td> 4 </td>
+			                </tr>
+			                <tr>
+			                    <td> 1233212 </td>
+			                    <td> Tiganetea </td>
+			                    <td> Cluj-Napoca, RO </td>
+			                    <td> 4 </td>
+			                </tr>
+			                <tr>
+			                    <td> 1233212 </td>
+			                    <td> Tiganetea </td>
+			                    <td> Cluj-Napoca, RO </td>
+			                    <td> 4 </td>
+			                </tr>
+			            </tbody>
+			        </table>
+			    </div>
 			</div>
 
 		</div>
