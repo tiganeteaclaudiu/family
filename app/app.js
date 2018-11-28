@@ -1,5 +1,5 @@
 
-username = '{{ username }}';
+username = {{ username }};
 
 console.log('user!: '+username);
 

@@ -1,7 +1,7 @@
 from app import app
 from app import db
 from flask import render_template,request, session, redirect, url_for
-from app.models import User, Family
+from app.models import User, Family, Join_Request
 from functools import wraps
 import json
 
@@ -22,7 +22,7 @@ def logged_in(f):
 @app.route('/index/')
 @logged_in
 def index():
-	return render_template('index.html')
+	return render_template('index.html',username = session['username'])
 
 @app.route('/register/')
 def register():
@@ -85,6 +85,7 @@ def post_login():
 			if user.password == password:
 				print ('logged in')
 				session['logged_in'] = True
+				session['username'] = username
 				return json.dumps({'status' : 'success'})
 			else:
 				print ('password wrong')
@@ -135,3 +136,69 @@ def add_family_member():
 		return json.dumps({'status':'failure'})
 
 	family.members.append()
+
+@app.route('/query_families/',methods=['POST'])
+def query_families():
+
+	JSONstring = json.dumps(request.get_json(force=True))
+	data = json.loads(JSONstring)
+
+	family_list = []
+
+	try:
+
+		if data['query_type'] == 'name':
+
+			name = data['name']
+			location = data['location_data']
+			families = Family.query.filter(Family.name == name).filter(Family.location == location).all()
+		else:
+
+			id = data['id']
+			families = Family.query.filter(Family.id == id).all()
+
+		print('query_families query result: {}'.format(families))
+
+		for family in families:
+			family_list.append({
+				'id' : family.id,
+				'name' : family.name,
+				'country' : family.country,
+				'location' : family.location,
+				'members' : len(family.members)
+				})
+
+		print("Families: {}".format(family_list))
+
+		return json.dumps({
+			'status' : 'success',
+			'families' : json.dumps(family_list, indent=4)
+			})
+
+	except Exception as e:
+		print('query_all_families ERROR: {}'.format(e))
+		return json.dumps({'status':'failure'})
+
+
+@app.route('/post_join_request/',methods=['POST'])
+def post_join_request():
+	JSONstring = json.dumps(request.get_json(force=True))
+	data = json.loads(JSONstring)
+
+	user = data['user']
+	family_id = int(data['family'])
+
+	user_id = User.query.filter_by(username=user).first().id
+
+	family = Family.query.filter_by(id=family_id).first()
+	join_request = Join_Request(requester_id=user_id,family_id=family_id)
+
+	family.join_requests.append(join_request)
+	db.session.add(family)
+	db.session.commit()
+
+	families = Family.query.all()
+	for family in families:
+		print("New family added: {}".format(family.join_requests))
+
+	return 'AY'

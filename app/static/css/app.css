@@ -108,6 +108,20 @@ body, html {
 	margin-top: 5%;
 }
 
+.button-styled {
+	height: 30px;
+	background-color: red;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	color: white;
+	padding: 23px;
+	border-radius: 7px;
+	font-family: arial;
+	font-size: 1.5rem;
+	cursor: pointer;
+}
+
 #no-family-image {
 	align-self: center;
 	margin: auto;
@@ -132,6 +146,7 @@ body, html {
 	justify-content: center;
 	align-items: center;
 	border-radius: 5px;
+	cursor: pointer;
 }
 
 .no-family-button p {
@@ -145,7 +160,6 @@ body, html {
 #join-family-container {
 	width: 70%;
 	height: 80%;
-	border: 1px solid gray;
 	display: flex;
 	justify-content: flex-start;
 	align-items: center;

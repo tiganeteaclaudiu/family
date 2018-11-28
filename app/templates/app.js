@@ -3,24 +3,8 @@ username = '{{ username }}';
 
 console.log('user!: '+username);
 
-function init_variables(username) {
-	
-	$.ajax({
-		url: '/get_username/',
-		method: 'POST',
-		success: function(data) {
-			data = JSON.parse(data);
-			username = data['username'];
-			console.log("USERNAME: "+username);
-		}
-	});
-
-}
-
 
 jQuery(document).ready(function(){
-
-init_variables();
 
 function hide_all_content() {
 	$(".content-2col").css('display','none');
@@ -91,17 +75,17 @@ function add_cursor_button_event(family_id) {
 
 	$(".cursor-button").click(function(e) {
 
-		username = {{ username }};
+		username = '{{ username }}';
 		console.log("USERNAME: " + username);
 
-		// $.ajax({
-		// 	url: '/post_join_request/',
-		// 	method: 'POST',
-		// 	data: JSON.stringify({
-		// 		'family' : family_id,
-		// 		'user' : username
-		// 	}),
-		// });
+		$.ajax({
+			url: '/post_join_request/',
+			method: 'POST',
+			data: JSON.stringify({
+				'family' : family_id,
+				'user' : username
+			}),
+		});
 
 	});
 

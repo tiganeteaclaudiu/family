@@ -16,7 +16,7 @@ app.config.from_object(Config)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-from app.models import User, Family, Families
+from app.models import User, Family
 
 # u = User(username='claudiu10',email='claudiu10@gmail.com',password='claudiu')
 # v = User(username='claudiu9',email='claudiu11@gmail.com',password='claudiu')
