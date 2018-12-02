@@ -10,12 +10,14 @@ $("#register-submit").click(function(){
 	username = $("#register-username");
 	email = $("#register-email");
 	password = $("#register-password");
+	location_data = $("#register-location");
 	submit = $("#register-submit");
 
 	data = JSON.stringify({
 		'username' : username.val(),
 		'email' : email.val(),
 		'password' : password.val(),
+		'location_data' : location_data.val()
 	});
 
 	$.ajax({

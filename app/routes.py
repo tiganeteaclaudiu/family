@@ -1,7 +1,7 @@
 from app import app
 from app import db
 from flask import render_template,request, session, redirect, url_for
-from app.models import User, Family, Join_Request
+from app.models import User, Family, Join_Request, family_identifier
 from functools import wraps
 import json
 
@@ -22,7 +22,8 @@ def logged_in(f):
 @app.route('/index/')
 @logged_in
 def index():
-	return render_template('index.html',username = session['username'])
+	no_family = check_no_family(session['username'])
+	return render_template('index.html',username = session['username'],no_family = no_family)
 
 @app.route('/register/')
 def register():
@@ -37,8 +38,9 @@ def post_register():
 		username = data['username']
 		email = data['email']
 		password = data['password']
+		location = data['location_data']
 
-		new_user = User(username=username,email=email,password=password)
+		new_user = User(username=username,email=email,password=password,location=location)
 		db.session.add(new_user)
 		db.session.commit()
 
@@ -46,6 +48,7 @@ def post_register():
 		print ('username: {}'.format(username))
 		print ('email: {}'.format(email))
 		print ('password: {}'.format(password))
+		print ('location: {}'.format(location))
 
 		return json.dumps({
 			'status' : 'success'
@@ -60,10 +63,6 @@ def post_register():
 @app.route('/login/')
 def login():
 	return render_template('login.html')
-
-@app.route('/family/')
-def family():
-	return render_template('family.html')
 
 @app.route('/post_login/',methods=['POST'])
 def post_login():
@@ -86,6 +85,7 @@ def post_login():
 				print ('logged in')
 				session['logged_in'] = True
 				session['username'] = username
+				check_no_family(username)
 				return json.dumps({'status' : 'success'})
 			else:
 				print ('password wrong')
@@ -101,6 +101,38 @@ def post_login():
 		return json.dumps({
 			'status' : 'failure'
 			})
+
+
+@app.route('/post_family/',methods=['POST'])
+def post_family():
+	try:
+		JSONstring = json.dumps(request.get_json(force=True))
+		data = json.loads(JSONstring)
+
+		name = data['name']
+		country = data['country']
+		location = data['location_data']
+		phrase = data['phrase']
+
+		new_family = Family(name=name,country=country,location=location)
+		db.session.add(new_family)
+		db.session.commit()
+
+		print ('post_family added family:\n')
+		print ('name: {}'.format(name))
+		print ('country: {}'.format(country))
+		print ('location: {}'.format(location))
+
+		return json.dumps({
+			'status' : 'success'
+			})
+
+	except Exception as e:
+		print ('post_family ERROR: {}'.format(e))
+		return json.dumps({
+			'status' : 'failure'
+			})
+
 
 @app.route('/add_family_member/',methods=['POST'])
 def add_family_member():
@@ -136,6 +168,29 @@ def add_family_member():
 		return json.dumps({'status':'failure'})
 
 	family.members.append()
+
+@app.route('/check_no_family/',methods=['POST'])
+def check_no_family(username):
+	try:
+		user = User.query.filter_by(username=username).first()
+		families = user.families
+
+		no_family = False
+
+		print('#check_no_family for user: {}'.format(username))
+		if len(families) == 0:
+			print('#check_no_family found no family.')
+			no_family = True
+		else:
+			print('#check_no_family found {} families.'.format(len(families)))
+			no_family = False
+
+		session['no_family'] = no_family
+		return no_family
+
+	except Exception as e:
+		print('#check_no_family ERROR: {}'.format(e))
+		return 'ERROR'
 
 @app.route('/query_families/',methods=['POST'])
 def query_families():
@@ -202,3 +257,78 @@ def post_join_request():
 		print("New family added: {}".format(family.join_requests))
 
 	return 'AY'
+
+@app.route('/query_join_requests/',methods=['GET'])
+def query_join_requests():
+	try:
+		username = session['username']
+
+		user = User.query.filter_by(username=username).first()
+		families = user.families
+
+		returned_data = []
+
+		for family in families:
+			print('FAMILY {}'.format(family))
+
+		for family in families:
+			requests = family.join_requests
+
+			requests_list = []
+
+			for request in requests:
+				print('REQUEST:{}'.format(request.requester_id))
+				user = User.query.filter_by(id=request.requester_id).first()
+
+				data = {
+					'id' : user.id,
+					'name' : user.username,
+					'location' : user.location
+				}
+
+				requests_list.append(data)
+
+			print("requests_list: {}".format(requests_list))
+
+			family = Family.query.filter_by(id=family.id).first().name
+
+			returned_data.append({
+				'family' : family,
+				'requests' : requests_list
+				})
+
+		print ("returned data: {}".format(returned_data))
+
+		return json.dumps(returned_data)
+
+	except Exception as e:
+		print('query_join_requests ERROR: {}'.format(e))
+		return ''
+
+
+@app.route('/accept_join_request/',methods=['POST'])
+def accept_join_request():
+
+	JSONstring = json.dumps(request.get_json(force=True))
+	data = json.loads(JSONstring)
+
+	data['family'] = data['family'].strip()
+
+	family = Family.query.filter_by(name=data['family']).first()
+
+	requester = User.query.filter_by(id=data['requester_id']).first()
+
+	join_request = Join_Request.query.filter(Join_Request.requester_id == data['requester_id']).filter(Join_Request.family_id == family.id).first()
+
+	db.session.delete(join_request)
+
+	family.members.append(requester)
+
+	db.session.add(family)
+
+	db.session.commit()
+
+	print('accept_join_request join_request: {}'.format(join_request))
+
+	return ''
+

@@ -11,6 +11,7 @@ class User(db.Model):
 	username = db.Column(db.String(64), index=True, unique=True,nullable=False)
 	email = db.Column(db.String(64),index=True, unique=True, nullable=False)
 	password = db.Column(db.String(128), nullable=False)
+	location = db.Column(db.String(128), nullable=False)
 	families = db.relationship('Family',secondary=family_identifier)
 
 	def dump(self):
