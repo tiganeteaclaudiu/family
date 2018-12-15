@@ -31,11 +31,11 @@
 		<div id='logo-container'>
 			<img src="../static/images/logo.png" style="width: 50%;" class="img-responsive pull-right">
 		</div>
-		<div class="menu-option">
+		<div class="menu-option" id='user-menu'>
 			<span class="glyphicon glyphicon-home" aria-hidden="true"></span>
 		</div>
-		<div class="menu-option">
-			<span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span>
+		<div class="menu-option" id='family-menu'>
+			<span class="icon icon-users" aria-hidden="true"></span>
 		</div>
 		<div class="menu-option">
 			<span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
@@ -65,7 +65,7 @@
 			</div>
 
 
-			<div class="content-2col" id='content_main-panel' style='display:none;'>
+			<div class="content-2col" id='content_user-menu-main-panel' style='display:none;'>
 				<div class='content-2col-col'>
 					<div id='no-family-image' style='margin-right:-20%;'>
 						<img src="../static/images/family.png" style="width: 70%;" class="img-responsive pull-right">
@@ -130,7 +130,7 @@
 			            <span id='join-family-search-id' aria-hidden="true" class="glyphicon glyphicon-search content-header-icon" style="cursor:pointer;color: #f85a3e;font-size: 2.4rem;"></span>
 			        </div>
 
-			        <table id="families-table">
+			        <table id="families-table" class='table-styled'>
 			            <tbody style="">
 			              
 			            </tbody>
@@ -209,7 +209,7 @@
 				    <div class='content-2col-col'>
 				        <h5 id="join-family-header" style="align-self: flex-start;">Family Join Requests:</h5>
 				        <p style="font-size: 1.2rem;margin-top: 10px;"> You have received these requests. Accepting them will make the user a member your family and will grant them access to your family's data. <b>Be careful who you accept!</b></p>
-				        <table id="join-requests-table" style="margin-top: 0%;">
+				        <table id="join-requests-table" class='table-styled' style="margin-top: 0%;">
 				            <tbody style="">
 				                <tr>
 				                    <th> ID </th>
@@ -219,6 +219,16 @@
 				            </tbody>
 				        </table>
 				        <div id="join-requests-delete-button" class="button-styled" style="position: absolute;bottom: 7%;">Delete all</div>
+				    </div>
+				</div>
+
+				<div class="content-2col" id="content_leave-family" style="display: flex;">
+				    <div class='content-2col-col'>
+				        <h5 id="join-family-header" style="align-self: flex-start;">Leave family:</h5>
+				        <p style=";font-size: 1.3rem;margin-top: 10px;"> Select a family to leave. <b>You can ask to join back anytime!</b></p>
+				        <table id="leave-family-table" class='table-styled' style="margin-top: 0%;">
+				       
+				        </table>
 				    </div>
 				</div>
 

@@ -6,43 +6,93 @@ console.log('user!: '+username);
 
 jQuery(document).ready(function(){
 
+menu_options = {
+	'user-menu' : {
+		'user-menu-main-panel' : [
+				{
+					'name' : 'Join Requests',
+					'link' : 'join-requests',
+					funct : function() {
+						console.log("MERGE FUNCTIA!");
+						query_join_requests();
+						}
+				},
+				{
+					'name' : 'Create Family',
+					'link' : 'create-family'
+				},
+				{
+					'name' : 'Join Family',
+					'link' : 'join-family'
+				},
+				{
+					'name' : 'Leave Family',
+					'link' : 'leave-family',
+					funct: function() {
+						query_families('user','leave-family-table','/leave_family/');
 
-sidebar_options = {
-	'main-panel' : {
-		'options' : [
-			{
-				'name' : 'Join Requests',
-				'link' : 'join-requests',
-				funct : function() {
-					console.log("MERGE FUNCTIA!");
-					query_join_requests();
 					}
-			},
-			{
-				'name' : 'Create Family',
-				'link' : 'create-family'
-			},
-			{
-				'name' : 'Join Family',
-				'link' : 'join-family'
-			}
-		]
+				}
+			],
+		'join-requests' : [
+				{
+					'name' : 'Leave Family',
+					'link' : 'leave-family',
+					funct: function() {
+						query_families('user','leave-family-table','/leave_family/');
+
+					}
+				}
+			]
+	},
+	'family-menu' : {
+		'family-menu-main' : [
+				{
+					'name' : 'Family Panel',
+					'link' : 'family_panel',
+					funct : function() {
+						console.log("MERGE FUNCTIA pt FAMILY PANEL!");
+						}
+				}
+			]
 	}
 }
+
 
 //variable that holds the last page the user was on
 
 {% if no_family == true %}
 
-show_content('no-family');
+// show_content('no-family');
 
 {% else %}
 
-show_content('main-panel');
+// show_content('user-menu','main-panel');
 
 {% endif %}
 
+function load_menu_options() {
+	console.log('load_menu_options called');
+	for (var key in menu_options) {
+		console.log('KEY: '+key);
+		load_menu_options_events(key);
+	}
+}
+
+function load_menu_options_events(key) {
+	$("#"+key).click(function(e) {
+		console.log('CLICKED: ');
+		console.log($(this));
+		load_sidebar_options(key);
+	});
+}
+
+load_menu_options();
+
 function show_content(id) {
+
+	console.log('show_content id = '+id);
+
 	load_sidebar_options(id);
 	hide_all_content();
 	$('#content_'+id).css('display','flex');
@@ -52,31 +102,57 @@ function hide_all_content() {
 	$(".content-2col").css('display','none');
 }
 
+//Function adding sidebar options
+//Supports adding sidebar options by either clicking items on the top menu or 
+// items on the sidebar
 
-function load_sidebar_options(content_id) {
-	content = $("#"+content_id);
-	
+//menu_options format:
+//	-first level (dict) : top menu items
+//	-second level (dict) : sidebar items that spawn another sidebar elements
+//	-third layer (array of dicts) : sidebar elements
+//		-name: name that appears on sidebar button
+//		-link: link to content (content tabs have the format content_LINK)
+//		-function: function to execute on clicking the sidebar element
+function load_sidebar_options(menu_option,sidebar_option) {
+	content = $("#"+menu_option);
+
+	if (typeof sidebar_option === 'undefined') { sidebar_option = menu_option+"-main-panel"; }
+
+	console.log('load_sidebar_options menu_option = '+menu_option);
+	console.log('load_sidebar_options sidebar_option = '+sidebar_option);
+
 	try {
-
-		if (content_id in sidebar_options) {
-
-			menu = sidebar_options[content_id];
-			console.log('MENU: '+JSON.stringify(menu));
-
+		//first level: button is found on top bar
+		if (menu_option in menu_options) {
+			//sidebar is cleared, to be filled again
 			$('#side-menu > a').remove();
 
-			for(var i=0;i<menu['options'].length;i++) {
+			// menu = second level
+			menu = menu_options[menu_option];
+			console.log('load_sidebar_options menu: '+JSON.stringify(menu));
+			console.log("load_sidebar_options sidebar option: "+menu[sidebar_option]);
 
-				name = menu['options'][i]['name'];
-				link = menu['options'][i]['link'];
+			sidebar_options = menu[sidebar_option];
+			//third level
+			for (var i=0;i<=sidebar_options.length-1;i++) {
 
+				console.log('load_sidebar_options sidebar[i]:' + sidebar_options[i]);
+				
+				option = sidebar_options[i];
+
+				name = option['name'];
+				link = option['link'];
+
+				//sidebar element is created
 				element = $('<a href="' + link +'"><div class="side-menu-option">'+ name +'</div></a>');
 
+				//sidebar element is added
 				$("#side-menu").append(element);
 
-				if ('funct' in menu['options'][i]) {
+				//if there is a funct on the third level, it's bound to a click event
+				if ('funct' in option) {
 
-					funct = menu['options'][i]['funct'];
+					funct = option['funct'];
 
 					element.click(function(e) {
 						e.preventDefault();
@@ -86,26 +162,48 @@ function load_sidebar_options(content_id) {
 				}
 
 			}
-
-			load_sidebar_links();
+			//load_menu_links method binds the click events to the new sidebar options
+			//menu, menu_option are passed further for recursivity:
+			//	if "link" is in menu, that means a newly created sidebar item is also on level 2
+			//	 so it actually runs load_sidebar_options again for his own sidebar elements
+			load_menu_links(menu, menu_option);
 
 		}
 
 	} catch(err) {
-		console.log('No sidebar options for element  '+err);
+		console.log('No menu options for element  '+err);
 	}
 }
 
-
-function load_sidebar_links() {
+//binds click events to new sidebar items
+//	if "link" is in menu, that means a newly created sidebar item is also on level 2
+//	 so it actually runs load_sidebar_options again for his own sidebar elements
+function load_menu_links(menu, menu_option) {
 
 	$("#side-menu > a").click(function(e) {
 		e.preventDefault();
 		link = $(this).attr('href');
 
+		if (link in menu ) {
+			console.log("FOUND AICI ASIDA SDASDASDASDASASD");
+			load_sidebar_options(menu_option,link);
+			add_back_button(menu_option);
+			return '';
+		}
+
 		show_content(link);
 	});
 
+}
+
+function add_back_button(menu_option) {
+	element = $('<a class="sidebar-back-button"><div class="side-menu-option">Back</div></a>');
+	$("#side-menu").append(element);
+	$("#side-menu > .sidebar-back-button").click(function(e) {
+		e.preventDefault();
+		load_sidebar_options(menu_option);
+		show_content(menu_option+'-main-panel');
+	});
 }
 
 
@@ -117,11 +215,11 @@ $("#family-join-button").click(function(e) {
 });
 
 $("#join-family-search-name").click(function(e) {
-	query_families('name');
+	query_families('name',"families-table",'/post_join_request/');
 });
 
 $("#join-family-search-id").click(function(e) {
-	query_families('id');
+	query_families('id',"families-table",'/post_join_reqsst/');
 });
 
 $("#join-family-switch-button").click(function(e) {
@@ -143,39 +241,55 @@ $("#family-create-button").click(function(e) {
 	show_content('created-family');
 });
 
-$(document).click(function(e) {
-    if ($(e.target).is('#families-table td')) {
+function hide_cursor_buttons(table_id) {
+	console.log('hide_cursor_buttons');
+	console.log(table_id+' td');
+	$(document).click(function(e) {
+    if ($(e.target).is(table_id+' td')) {
         e.preventDefault();
         console.log('pressed row');
     } else {
         console.log("did not press row");
-        $('.cursor-button').remove();
+        $(table_id).parent().find('.cursor-button').remove();
     }
-});
+	});
+}
 
-function refresh_cursor_button_event() {
+
+
+
+function refresh_cursor_button_event(table_id,url) {
 
 	console.log("refresh_cursor_button_event");
+	console.log(table_id+" td");
 
-	$("#families-table td").click(function(e) {
+	$(table_id+" td").click(function(e) {
 	    console.log("row click");
 	    var num = Math.floor((Math.random() * 10) + 1);
 	    var div = $('<div class="cursor-button">Send Join Request</div>');
-	    container = $("#content_join-family");
+	    container = $(table_id).parent();
+	    console.log('REFRESH CONTAINER: ');
+	    console.log(container);
 
-	    $('.cursor-button').remove();
+	    hide_cursor_buttons(table_id);
 
 	    div.appendTo(container).offset({ top: e.pageY, left: e.pageX });
 
-		family_id = $(e.target).parent().find('td').first().html();
+	    console.log(container)
+	    button = container.find('.cursor-button');
+	    console.log(button);
 
-		add_cursor_button_event(family_id);
+		id = $(e.target).parent().find('td').first().html();
+
+		add_cursor_button_event(id,url);
 
 	});
 
 }
 
-function add_cursor_button_event(family_id) {
+
+
+function add_cursor_button_event(id,url) {
 
 	console.log("add_cursor_button_event");
 
@@ -185,10 +299,10 @@ function add_cursor_button_event(family_id) {
 		console.log("USERNAME: " + username);
 
 		$.ajax({
-			url: '/post_join_request/',
+			url: url,
 			method: 'POST',
 			data: JSON.stringify({
-				'family' : family_id,
+				'id' : id,
 				'user' : username
 			}),
 		});
@@ -197,13 +311,19 @@ function add_cursor_button_event(family_id) {
 
 }
 
-function empty_families_table() {
-	$("#families-table tr, h3").remove()
+
+
+function empty_table(table_id) {
+	$(table_id+" tr, h3").remove();
 }
 
-function query_families(query_type) {
+function query_families(query_type, table_id, popup_url) {
+
+	if (typeof popup_url === 'undefined') { popup_url = ''; }
 
 	data = {};
+
+	table_id = "#" + table_id;
 
 	if (query_type === 'name') {
 		data = JSON.stringify({
@@ -211,10 +331,15 @@ function query_families(query_type) {
 			'name' : $('#join-family-name').val(),
 			'location_data': $('#join-family-location').val()
 		});
-	} else {
+	} else if (query_type === 'id') {
 		data = JSON.stringify({
 			'query_type' : 'id',
 			'id' : $("#join-family-id").val()
+		});
+	} else if (query_type === 'user') {
+		data = JSON.stringify({
+			'query_type' : 'user',
+			'username' : '{{ username }}'
 		});
 	}
 
@@ -228,24 +353,22 @@ function query_families(query_type) {
 				families = JSON.parse(families)
 				console.log(families);
 
-				empty_families_table();
+				empty_table(table_id);
 
-
-				if(families.length != 0 ) {
-
-					html = `<tr>
+				html = `<tr>
 			                    <th> ID </th>
 			                    <th> Name </th>
 			                    <th> Location </th>
 			                    <th> No. of members </th>
-			                </tr>`
+			                </tr>`;
 
-					$("#families-table").append(html);
+
+				if(families.length != 0 ) {
 
 					for( var i=0;i<families.length;i++ ) {
 						family = families[i];
 						console.log(family);
-						html = `
+						html += `
 							<tr>
 			                    <td> `+family['id']+` </td>
 			                    <td> `+family['name']+` </td>
@@ -254,12 +377,18 @@ function query_families(query_type) {
 			                </tr>
 					`}
 
-					$("#families-table").append(html);
-					refresh_cursor_button_event();
+					$(table_id).append(html);
+
+					console.log("POPUP_URL = "+popup_url)
+
+					if(popup_url !== '') {
+						refresh_cursor_button_event(table_id,popup_url);
+					}
+					
 
 				} else {
 					console.log('NO FAMILIES');
-					$("#families-table").append('<h3 style="text-align:center;">No families found.</h2>');
+					$(table_id).append('<h3 style="text-align:center;">No families found.</h2>');
 				}
 
 			}
@@ -326,62 +455,12 @@ function query_join_requests() {
 
 }
 
+
+
 function add_request_cursor_button() {
-
-	console.log("request_cursor_button_event");
-
-	$("#join-requests-table td").click(function(e) {
-	    console.log("row click");
-	    var num = Math.floor((Math.random() * 10) + 1);
-	    var div = $('<div class="cursor-button2">Accept</div>');
-	    container = $("#content_join-requests");
-
-	    $('.cursor-button2').remove();
-
-	    div.appendTo(container).offset({ top: e.pageY, left: e.pageX });
-
-		request_id = $(e.target).parent().find('td').first().html();
-
-		request_cursor_button_event(request_id);
-
-	});
-
+	refresh_cursor_button_event('join-requests-table','/accept_join_request/');
 }
 
-function request_cursor_button_event(request_id) {
-
-	console.log("request_cursor_button_event");
-
-	$(".cursor-button2").click(function(e) {
-
-		family = $(e.target).parent().find('td').last().html();
-		console.log("cursor event family: " + family);
-
-		$.ajax({
-			url: '/accept_join_request/',
-			method: 'POST',
-			data: JSON.stringify({
-				'requester_id' : request_id,
-				'family' : family
-			}),
-			success: function(data) {
-				query_join_requests();
-			}
-		});
-
-	});
-
-}
-
-$(document).click(function(e) {
-    if ($(e.target).is('#join-requests-table td')) {
-        e.preventDefault();
-        console.log('pressed row');
-    } else {
-        console.log("did not press row");
-        $('.cursor-button2').remove();
-    }
-});
 
 function add_family_member(username,family) {
 

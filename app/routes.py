@@ -207,10 +207,12 @@ def query_families():
 			name = data['name']
 			location = data['location_data']
 			families = Family.query.filter(Family.name == name).filter(Family.location == location).all()
-		else:
-
+		elif data['query_type'] == 'id':
 			id = data['id']
 			families = Family.query.filter(Family.id == id).all()
+		elif data['query_type'] == 'user':
+			user = User.query.filter_by(username=data['username']).first()
+			families = user.families
 
 		print('query_families query result: {}'.format(families))
 
@@ -237,26 +239,30 @@ def query_families():
 
 @app.route('/post_join_request/',methods=['POST'])
 def post_join_request():
-	JSONstring = json.dumps(request.get_json(force=True))
-	data = json.loads(JSONstring)
+	try:
+		JSONstring = json.dumps(request.get_json(force=True))
+		data = json.loads(JSONstring)
 
-	user = data['user']
-	family_id = int(data['family'])
+		user = data['user']
+		family_id = int(data['id'])
 
-	user_id = User.query.filter_by(username=user).first().id
+		user_id = User.query.filter_by(username=user).first().id
 
-	family = Family.query.filter_by(id=family_id).first()
-	join_request = Join_Request(requester_id=user_id,family_id=family_id)
+		family = Family.query.filter_by(id=family_id).first()
+		join_request = Join_Request(requester_id=user_id,family_id=family_id)
 
-	family.join_requests.append(join_request)
-	db.session.add(family)
-	db.session.commit()
+		family.join_requests.append(join_request)
+		db.session.add(family)
+		db.session.commit()
 
-	families = Family.query.all()
-	for family in families:
-		print("New family added: {}".format(family.join_requests))
+		families = Family.query.all()
+		for family in families:
+			print("post_join_request family: {}".format(family.join_requests))
 
-	return 'AY'
+		return json.dumps({'status' : 'success' })
+	except Exception as e:
+		print('post_join_request ERROR: {}'.format(e))
+		return json.dumps({'status' : 'failure' })
 
 @app.route('/query_join_requests/',methods=['GET'])
 def query_join_requests():
@@ -332,3 +338,37 @@ def accept_join_request():
 
 	return ''
 
+@app.route('/leave_family/',methods=['POST'])
+def leave_family():	
+	JSONstring = json.dumps(request.get_json(force=True))
+	data = json.loads(JSONstring)
+
+	id = data['id']
+	username = data['user']
+
+
+	try:
+		user = User.query.filter_by(username=username).first()
+		family = Family.query.filter_by(id=id).first()
+
+		print('Family before:')
+		print(family.members)
+		print('User before:')
+		print(user.families)
+		user.families.remove(family)
+
+		db.session.commit()
+
+		user = User.query.filter_by(username=username).first()
+		family = Family.query.filter_by(id=id).first()
+
+		print('Family after:')
+		print(family.members)
+		print('User after:')
+		print(user.families)
+
+		return json.dumps({'status' : 'success'})
+
+	except Exception as e:
+		print('leave_family ERROR: {}'.format(e))
+		return json.dumps({'status' : 'failure'})

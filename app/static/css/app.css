@@ -455,55 +455,48 @@ body, html {
 
 }
 
-/* TABLES STYLE */
+/* TABLES STYLE */	
 
-#families-table {
+.table-styled {
 	width: 100%;
 	height: auto;
 	margin-top: 6%;
 }
 
-#families-table tr {
+.table-styled tr {
 	text-align: center;
 	line-height: 35px;
 	font-size: 1.3rem;
 }
 
-#families-table th {
+.table-styled th {
 	background-color: #2ad4ea;
 }
 
-#families-table tr:nth-child(even) {
+.table-styled tr:nth-child(even) {
     background-color: #e8e8e8;
 }
 
-#families-table tr:hover {
+.table-styled tr:hover {
 	background-color: #ffdeb7;
 	cursor: pointer;
 }
 
+/* ICONS */
 
-#join-requests-table {
-	width: 100%;
-	height: auto;
-	margin-top: 6%;
+.icon::before {
+	content: "";
+	background-size: 100% 100%;
+	display: inline-block;
+	height: 1.5rem;
+	width: 1.5rem;
+	position: relative;
+	top: 0.4rem;
+	margin-left: 1.5rem;
+	margin-right: 1.7rem;
+	filter: invert(100);
 }
 
-#join-requests-table tr {
-	text-align: center;
-	line-height: 35px;
-	font-size: 1.3rem;
-}
-
-#join-requests-table th {
-	background-color: #2ad4ea;
-}
-
-#join-requests-table tr:nth-child(even) {
-    background-color: #e8e8e8;
-}
-
-#join-requests-table tr:hover {
-	background-color: #ffdeb7;
-	cursor: pointer;
-}
+ .icon-users:before {
+	background-image: url('../images/icons/users.svg');
+ }
