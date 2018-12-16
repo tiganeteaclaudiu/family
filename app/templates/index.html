@@ -46,6 +46,11 @@
 		<div class="menu-option">
 			<span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span>
 		</div>
+		<div style="position: absolute;right: 0%;width: 23%;" class="menu-droplist-container">
+		    <h5 style="color: white;margin: 0;margin-right: 7%;"> Switch family: </h5>
+		    <select name="family" id="family-droplist" class='droplist-styled'>
+		    </select>
+		</div>
 	</div>
 	<div id='content-container'>
 		
@@ -205,7 +210,7 @@
 				</div>
 
 
-				<div class="content-2col" id="content_join-requests" style="display: flex;">
+				<div class="content-2col" id="content_join-requests" style="display: none;">
 				    <div class='content-2col-col'>
 				        <h5 id="join-family-header" style="align-self: flex-start;">Family Join Requests:</h5>
 				        <p style="font-size: 1.2rem;margin-top: 10px;"> You have received these requests. Accepting them will make the user a member your family and will grant them access to your family's data. <b>Be careful who you accept!</b></p>
@@ -222,12 +227,35 @@
 				    </div>
 				</div>
 
-				<div class="content-2col" id="content_leave-family" style="display: flex;">
+				<div class="content-2col" id="content_leave-family" style="display: none;">
 				    <div class='content-2col-col'>
 				        <h5 id="join-family-header" style="align-self: flex-start;">Leave family:</h5>
 				        <p style=";font-size: 1.3rem;margin-top: 10px;"> Select a family to leave. <b>You can ask to join back anytime!</b></p>
 				        <table id="leave-family-table" class='table-styled' style="margin-top: 0%;">
 				       
+				        </table>
+				    </div>
+				</div>
+
+				<div class="content-2col" id="content_family-reminders" style="display: none;">
+				    <div class="content-2col-col">
+				        <h5 id="join-family-header" style="align-self: flex-start;">Reminders
+				        </h5>
+				        <div class='long-input-container'>
+						    <input type="text" id='reminder-input' class='long-input'>
+						    <div class='button-styled' id='reminder-add-button' style="margin-left:3%">
+						        <h5 style="color: white;margin: 0;font-family: Arial;font-weight: bold;">Add</h5>
+						    </div>
+						</div>
+				        <table id='reminders-table' class='table-list'>
+				            <tbody>
+				                <tr>
+				                    <td>Grab some milk from the corner store at 7 am then come home
+				                    </td>
+				                    <td>from Claudiu</td>
+				                    <td> at 4 Feb, 10:33AM </td>
+				                </tr>
+				            </tbody>
 				        </table>
 				    </div>
 				</div>

@@ -1,9 +1,11 @@
 from app import app
 from app import db
 from flask import render_template,request, session, redirect, url_for
-from app.models import User, Family, Join_Request, family_identifier
+from app.models import User, Family, Join_Request, family_identifier, Reminder
 from functools import wraps
 import json
+import datetime
+
 
 def logged_in(f):
 	@wraps(f)
@@ -177,7 +179,7 @@ def check_no_family(username):
 
 		no_family = False
 
-		print('#check_no_family for user: {}'.format(username))
+		print('#check_no_family for user: {}'.format(user.families))
 		if len(families) == 0:
 			print('#check_no_family found no family.')
 			no_family = True
@@ -315,16 +317,18 @@ def query_join_requests():
 @app.route('/accept_join_request/',methods=['POST'])
 def accept_join_request():
 
+	get_current_family()
+
 	JSONstring = json.dumps(request.get_json(force=True))
 	data = json.loads(JSONstring)
 
-	data['family'] = data['family'].strip()
+	data['family'] = data['family']
 
 	family = Family.query.filter_by(name=data['family']).first()
 
-	requester = User.query.filter_by(id=data['requester_id']).first()
+	requester = User.query.filter_by(id=data['id']).first()
 
-	join_request = Join_Request.query.filter(Join_Request.requester_id == data['requester_id']).filter(Join_Request.family_id == family.id).first()
+	join_request = Join_Request.query.filter(Join_Request.requester_id == data['id']).filter(Join_Request.family_id == family.id).first()
 
 	db.session.delete(join_request)
 
@@ -372,3 +376,119 @@ def leave_family():
 	except Exception as e:
 		print('leave_family ERROR: {}'.format(e))
 		return json.dumps({'status' : 'failure'})
+
+@app.route('/set_current_family/',methods=['POST'])
+def set_current_family():
+	JSONstring = json.dumps(request.get_json(force=True))
+	data = json.loads(JSONstring)
+
+	try:
+		family_name = data['family_name']
+		username = data['username']
+
+		user = User.query.filter_by(username=username).first()
+		family = Family.query.filter_by(name=family_name).first()
+
+		print('set_current_family current_family BEFORE: {}'.format(user.current_family))
+		user.current_family = family.id
+
+		db.session.add(user)
+		db.session.commit()
+
+		print('set_current_family current_family AFTER: {}'.format(user.current_family))
+		return json.dumps({'status' : 'success'})
+
+	except Exception as e:
+		print('set_current_family ERROR: {}'.format(e))
+		return json.dumps({'status' : 'failure'})
+
+@app.route('/get_current_family/',methods=['POST'])
+def get_current_family():
+	JSONstring = json.dumps(request.get_json(force=True))
+	data = json.loads(JSONstring)
+
+	try:
+		username = data['username']
+		user = User.query.filter_by(username=username).first()
+
+		current_family_id = user.current_family
+		
+		family = Family.query.filter_by(id=current_family_id).first()
+
+		if family == None:
+			return json.dumps({'status' : 'success','current_family' : ''})
+
+		print('get_current_family current_family name: {}'.format(family.name))
+
+		return json.dumps({'status' : 'success','current_family' : family.name})
+
+	except Exception as e:
+		print('get_current_family ERROR: {}'.format(e))
+		
+		return json.dumps({'status' : 'failure'})
+
+@app.route('/post_reminders/',methods=['POST'])
+def post_reminders():
+	try:
+		JSONstring = json.dumps(request.get_json(force=True))
+		data = json.loads(JSONstring)
+
+		family_name = data['family_name']
+		username = data['username']
+		body = data['body']
+		date_time = str(datetime.datetime.now())
+
+		user = User.query.filter_by(username=username).first()
+		family = Family.query.filter_by(name=family_name).first()
+
+		family_id = family.id
+
+		print('query_reminders date_time = {}'.format(type(date_time)))
+
+		reminder = Reminder(family=family_id,body=body,date_time=date_time,user=username)
+
+		db.session.add(reminder)
+		db.session.commit()
+
+		return json.dumps({'status':'success'})
+
+	except Exception as e:
+		print('post_reminders ERROR: {}'.format(e))
+		return json.dumps({'status' : 'failure' })
+
+
+@app.route('/query_reminders/',methods=['POST'])
+def query_reminders():
+	try:
+		JSONstring = json.dumps(request.get_json(force=True))
+		data = json.loads(JSONstring)
+
+		print('query_reminders family_name = {}'.format(data['family_name']))
+
+		family_name = data['family_name']
+		family = Family.query.filter_by(name=family_name).first()
+
+		reminders = family.reminders
+		print('query_reminders family.reminders: {}'.format(family.reminders))
+		
+		reminders_list = []
+
+		for reminder in reminders:
+			reminders_list.append({'id':reminder.id,'body' : reminder.body,'date_time' :reminder.date_time,'user':reminder.user})
+
+		reminders_dict = json.dumps({'reminders' : reminders_list})
+
+		print('query_reminders reminders JSON:')
+		print(json.dumps(reminders_dict))
+
+		return json.dumps({'status':'success','reminders':reminders_dict})
+
+	except Exception as e:
+		print('query_reminders ERROR: {}'.format(e))
+		return json.dumps({'status':'failure'})
+
+def get_current_family():
+
+	user = User.query.filter_by(username=session['username']).first()
+	print('get_current_family RESULT: {}'.format(user.current_family))
+	return user.current_family

@@ -6,6 +6,8 @@ console.log('user!: '+username);
 
 jQuery(document).ready(function(){
 
+current_family = '';
+
 menu_options = {
 	'user-menu' : {
 		'user-menu-main-panel' : [
@@ -13,6 +15,12 @@ menu_options = {
 					'name' : 'Join Requests',
 					'link' : 'join-requests',
 					funct : function() {
+						console.log("MERGE FUNCTIA!");
+						console.log("MERGE FUNCTIA!");
+						console.log("MERGE FUNCTIA!");
+						console.log("MERGE FUNCTIA!");
+						console.log("MERGE FUNCTIA!");
+						console.log("MERGE FUNCTIA!");
 						console.log("MERGE FUNCTIA!");
 						query_join_requests();
 						}
@@ -39,20 +47,39 @@ menu_options = {
 					'name' : 'Leave Family',
 					'link' : 'leave-family',
 					funct: function() {
-						query_families('user','leave-family-table','/leave_family/');
+						console.log("MERGE FUNCTIA!");
+						console.log("MERGE FUNCTIA!");
+					}
+				},
+				{
+					'name' : 'test2',
+					'link' : 'join-family',
+					funct: function() {
+						console.log("MERGE FUNCTIA2!");
+						console.log("MERGE FUNCTIA2!");
 
 					}
 				}
-			]
+			],
+		'leave-family' : [
+			{
+				'name' : 'test2',
+				'link' : 'create-family',
+				funct: function() {
+					console.log('TESTTESTESTESTEST');
+				}
+			}
+		]
 	},
 	'family-menu' : {
-		'family-menu-main' : [
+		'family-menu-main-panel' : [
 				{
-					'name' : 'Family Panel',
-					'link' : 'family_panel',
+					'name' : 'Reminders',
+					'link' : 'family-reminders',
 					funct : function() {
-						console.log("MERGE FUNCTIA pt FAMILY PANEL!");
-						}
+						console.log("MERGE FUNCTIA pt reminder!");
+						query_reminders();
+					}
 				}
 			]
 	}
@@ -63,11 +90,11 @@ menu_options = {
 
 {% if no_family == true %}
 
-// show_content('no-family');
+show_content('no-family');
 
 {% else %}
 
-// show_content('user-menu','main-panel');
+load_sidebar_options('user-menu');
 
 {% endif %}
 
@@ -130,18 +157,21 @@ function load_sidebar_options(menu_option,sidebar_option) {
 			// menu = second level
 			menu = menu_options[menu_option];
 			console.log('load_sidebar_options menu: '+JSON.stringify(menu));
-			console.log("load_sidebar_options sidebar option: "+menu[sidebar_option]);
+			console.log("load_sidebar_options sidebar option: "+JSON.stringify(menu[sidebar_option]));
 
 			sidebar_options = menu[sidebar_option];
 			//third level
 			for (var i=0;i<=sidebar_options.length-1;i++) {
 
-				console.log('load_sidebar_options sidebar[i]:' + sidebar_options[i]);
+				console.log('load_sidebar_options sidebar[i]:' + JSON.stringify(sidebar_options[i]));
 				
 				option = sidebar_options[i];
 
 				name = option['name'];
 				link = option['link'];
+
+				console.log('name = '+name);
+				console.log('link = '+link);
 
 				//sidebar element is created
 				element = $('<a href="' + link +'"><div class="side-menu-option">'+ name +'</div></a>');
@@ -151,14 +181,8 @@ function load_sidebar_options(menu_option,sidebar_option) {
 
 				//if there is a funct on the third level, it's bound to a click event
 				if ('funct' in option) {
-
 					funct = option['funct'];
-
-					element.click(function(e) {
-						e.preventDefault();
-						funct();
-					});
-
+					add_sidebar_funct(element,option['funct']);
 				}
 
 			}
@@ -175,22 +199,39 @@ function load_sidebar_options(menu_option,sidebar_option) {
 	}
 }
 
+function add_sidebar_funct(element,funct) {
+
+	element.click(function(e) {
+		e.preventDefault();
+		funct();
+	});
+}
+
 //binds click events to new sidebar items
 //	if "link" is in menu, that means a newly created sidebar item is also on level 2
 //	 so it actually runs load_sidebar_options again for his own sidebar elements
 function load_menu_links(menu, menu_option) {
 
+	console.log('load_menu_links called: ');
+	console.log('menu: '+JSON.stringify(menu))
+	console.log('menu_option: '+JSON.stringify(menu_option))
+
+
 	$("#side-menu > a").click(function(e) {
 		e.preventDefault();
 		link = $(this).attr('href');
 
-		if (link in menu ) {
-			console.log("FOUND AICI ASIDA SDASDASDASDASASD");
-			load_sidebar_options(menu_option,link);
-			add_back_button(menu_option);
-			return '';
-		}
+		// if (link in menu ) {
+		// 	console.log("FOUND AICI ASIDA SDASDASDASDASASD" + link);
+		// 	link2 = link;
+		// 	$('#content_'+link2).css('display','flex');
+		// 	load_sidebar_options(menu_option,link2);
+		// 	add_back_button(menu_option);
+		// 	show_content(link2);
+		// 	return '';
+		// }
 
+		console.log("SHOWING LINK: =========> "+link);
 		show_content(link);
 	});
 
@@ -219,7 +260,7 @@ $("#join-family-search-name").click(function(e) {
 });
 
 $("#join-family-search-id").click(function(e) {
-	query_families('id',"families-table",'/post_join_reqsst/');
+	query_families('id',"families-table",'/post_join_request/');
 });
 
 $("#join-family-switch-button").click(function(e) {
@@ -258,7 +299,9 @@ function hide_cursor_buttons(table_id) {
 
 
 
-function refresh_cursor_button_event(table_id,url) {
+function refresh_cursor_button_event(table_id,url,extra_data) {
+
+	if (typeof extra_data === 'undefined') { extra_data = ''; }
 
 	console.log("refresh_cursor_button_event");
 	console.log(table_id+" td");
@@ -281,7 +324,7 @@ function refresh_cursor_button_event(table_id,url) {
 
 		id = $(e.target).parent().find('td').first().html();
 
-		add_cursor_button_event(id,url);
+		add_cursor_button_event(id,url,extra_data);
 
 	});
 
@@ -289,7 +332,9 @@ function refresh_cursor_button_event(table_id,url) {
 
 
 
-function add_cursor_button_event(id,url) {
+function add_cursor_button_event(id,url,extra_data) {
+
+	if (typeof extra_data === 'undefined') { extra_data = ''; }
 
 	console.log("add_cursor_button_event");
 
@@ -298,13 +343,27 @@ function add_cursor_button_event(id,url) {
 		username = '{{ username }}';
 		console.log("USERNAME: " + username);
 
+		data = {
+			'id' : id,
+			'user' : username
+		}
+
+		if (extra_data !== '') {
+
+			console.log("ADD CURSOR FOUND EXTRA DATA:  ");
+			console.log(JSON.stringify(extra_data));
+
+			for (var key in extra_data) {
+				data[key] = extra_data[key];
+			}
+			console.log('DATA AFTER EXTRA: '+JSON.stringify(data));
+
+		}
+
 		$.ajax({
 			url: url,
 			method: 'POST',
-			data: JSON.stringify({
-				'id' : id,
-				'user' : username
-			}),
+			data: JSON.stringify(data)
 		});
 
 	});
@@ -443,7 +502,12 @@ function query_join_requests() {
 					`
 
 					$("#join-requests-table").append(html);
-					add_request_cursor_button();
+
+					extra_data = {
+						'family' : current_family
+					}
+
+					refresh_cursor_button_event('#join-requests-table','/accept_join_request/',extra_data);
 
 				}
 
@@ -485,11 +549,184 @@ function add_family_member(username,family) {
 
 }
 
+function load_family_droplist() {
+
+	data = {
+		'query_type' : 'user',
+		'username' : '{{ username }}'
+	}
+
+	data = JSON.stringify(data);
+
+	$.ajax({
+		url : '/query_families/',
+		method : 'POST',
+		data: data,
+		success : function(data) {
+			data = JSON.parse(data);
+			families = data['families'];
+			families = JSON.parse(families)
+			if( JSON.stringify(families) === '[]') {
+				console.log('NO FAMILY ============');
+			} else {
+
+				empty_family_droplist();
+
+				for(var i=0;i<families.length;i++) {
+					name = families[i]['name'];
+					console.log('FAMILIES ========'+name);
+					html = '<option value="'+name+'" selected="selected">'+name+'</option>';
+					$("#family-droplist").append(html);
+				}
+
+				if(families.length === 1) {
+					console.log('ADASDASDASS');
+					console.log(families);
+					set_current_family(families[0].name);
+
+				}
+
+				get_current_family();
+			}
+		}
+	});
+}
+
+function empty_family_droplist() {
+	$("#family-droplist").find('option').remove();
+}
+
+load_family_droplist();
+
+function set_current_family(name) {
+	data = {
+		'family_name' : name,
+		'username' : '{{ username }}'
+	}
+
+	$.ajax({
+		url: '/set_current_family/',
+		method: 'POST',
+		data: JSON.stringify(data),
+		success: function(data) {
+			data = JSON.parse(data);
+			current_family = name;
+		}
+	});
+}
+
+function get_current_family() {
+	data = {
+		'username' : '{{ username }}'
+	}
+
+	$.ajax({
+		url: '/get_current_family/',
+		method: 'POST',
+		data: JSON.stringify(data),
+		success: function(data) {
+			data = JSON.parse(data);
+
+			if(data['status'] == 'success' && data['current_family'] !== '') {
+				droplist = $("#family-droplist");
+				droplist.val(data['current_family']);
+				current_family = data['current_family'];
+			}
+		}
+	});
+}
+
+function return_current_family() {
+	return current_family;
+}
+
+get_current_family();
+
+function query_reminders() {
+
+	console.log('CURRENT FAMILY = ========123123=======')
+	console.log(current_family);
+
+	data = {
+		'family_name' : return_current_family()
+	}
+
+	$.ajax({
+		url: '/query_reminders/',
+		method: 'POST',
+		data: JSON.stringify(data),
+		success: function(data) {
+			console.log("VARUTUUUUUUU");
+			data=JSON.parse(data);
+			if(data['status'] === 'success') {
+				reminders = JSON.parse(data['reminders']);
+				reminders = reminders['reminders'];
+				
+				load_reminders(reminders);
+			}
+		}
+	});
+
+}
+
+function add_reminders(body) {
+
+	data = JSON.stringify({
+		'family_name' : current_family,
+		'username' : '{{ username }}',
+		'body' : body,
+	});
+
+	console.log('add_reminders data: ');
+	console.log(data);
+
+	$.ajax({
+		url: '/post_reminders/',
+		method: 'POST',
+		data: data,
+		success: function(data) {
+			data = JSON.parse(data);
+			query_reminders();
+		}
+	});
+
+}
+
+function load_reminders(reminders) {
+
+	console.log('load_reminders data: '+JSON.stringify(reminders));
+
+	table = $("#reminders-table");
+	table.find('tr').remove();
+
+	for (var i=0;i<=reminders.length-1;i++)	{
+		console.log('reminder: '+reminders[i]);
+		html = '<tr>';
+		html += '<td style="display:none">'+reminders[i]['id']+'</td>';
+		html += '<td>'+reminders[i]['body']+'</td>';
+		html += '<td>by:'+reminders[i]['user']+'</td>';
+		html += '<td>'+reminders[i]['date_time']+'</td>';
+		html += '<td><input type="checkbox"></td>'
+		html += '</tr>';
+		table.append(html);
+}}
+
+
 // ---------------------------- BUTTON EVENTS 
+
+$("#family-droplist").change(function() {
+	value = $(this).val();
+	console.log("FAMILY DROPLIST CURRENT: "+value);
+
+	set_current_family(value);
+
+	$("#family-droplist").val(value);
+});
 
 $("#content-back-button").click(function(e) {
 	e.preventDefault();
-
+	console.log(current_family);
+	query_reminders();
 });
 
 $("#create-family-post-button").click(function(e){
@@ -518,10 +755,14 @@ $("#create-family-post-button").click(function(e){
 				console.log('post_family success');
 				add_family_member('{{ username }}',name);
 				show_content('created-family');
+
+				set_current_family(name);
+				setTimeout(load_family_droplist,1000);
 			}
 
 		}
 	});
+
 });
 
 $("#created-family-button").click(function(e) {
@@ -529,5 +770,11 @@ $("#created-family-button").click(function(e) {
 	location.reload();
 });
 
+$("#reminder-add-button").click(function(e) {
+	e.preventDefault();
+	reminder_body = $("#reminder-input").val();
+	add_reminders(reminder_body);
+
+})
 
 });

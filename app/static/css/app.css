@@ -305,6 +305,29 @@ body, html {
 	background-color: #9e3825;
 }
 
+.menu-droplist-container {
+	width: 7%;
+	height: 100%;
+	background-color: #f85a3e;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.droplist-styled {
+	width: auto;
+	border: 1px solit black;
+	border-radius: 15px;
+	height: 40%;
+	padding-left: 6%;
+	font-size: 1.2rem;
+	appearance: none;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	cursor: pointer;
+	padding-right: 6%;"
+}
+
 #register-container {
 	width: 30%;
 	height: 80%;
@@ -444,7 +467,7 @@ body, html {
 	width: 43%;
 	height: 40px;
 	background-color: #fed766;
-	margin-top: 7%;
+	margin-top: 2%;
 	border-radius: 5px;
 	display: flex;
 	justify-content: center;
@@ -453,6 +476,27 @@ body, html {
 	color: #f85a3e;
 	font-size: 1.2rem;
 
+}
+
+.long-input-container {
+	width: 120%;
+	height: 10%;
+	margin-top: 13%;
+	border-radius: 8px;
+	display: flex;
+	padding: 2%;
+	font-size: 1.3rem;
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	position: relative;
+}
+
+.long-input {
+	border: none;
+	width: 85%;
+	height: 100%;
+	border-bottom: 1px solid gray;
 }
 
 /* TABLES STYLE */	
@@ -480,6 +524,25 @@ body, html {
 .table-styled tr:hover {
 	background-color: #ffdeb7;
 	cursor: pointer;
+}
+
+.table-list {
+	width: 100%;
+	margin-top: 6%;
+}
+
+.table-list tr {
+
+    width: 100%;
+
+}
+.table-list tr::before {
+
+    content: "• ";
+    font-size: 2rem;
+    margin: 0;
+    margin-right: 11px;
+
 }
 
 /* ICONS */
