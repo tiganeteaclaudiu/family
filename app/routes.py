@@ -1,7 +1,7 @@
 from app import app
 from app import db
 from flask import render_template,request, session, redirect, url_for
-from app.models import User, Family, Join_Request, family_identifier, Reminder
+from app.models import User, Family, Join_Request, family_identifier, Reminder, List
 from functools import wraps
 import json
 import datetime
@@ -487,8 +487,107 @@ def query_reminders():
 		print('query_reminders ERROR: {}'.format(e))
 		return json.dumps({'status':'failure'})
 
-def get_current_family():
+@app.route('/delete_reminders/',methods=['POST'])
+def delete_reminders():
+	try:
+		JSONstring = json.dumps(request.get_json(force=True))
+		data = json.loads(JSONstring)
 
+		id = data['id']
+
+		reminder = Reminder.query.filter_by(id=id).first()
+
+		db.session.delete(reminder)
+		db.session.commit()		
+
+		return json.dumps({'status':'success'})
+
+	except Exception as e:
+		print('delete_reminders ERROR: {}'.format(e))
+		return json.dumps({'status':'failure'})
+
+@app.route('/post_lists/',methods=['POST'])
+def post_lists():
+	try:
+		JSONstring = json.dumps(request.get_json(force=True))
+		data = json.loads(JSONstring)
+
+		family_name = data['family_name']
+		username = data['username']
+		title = data['title']
+		date_time = str(datetime.datetime.now())
+		elements_json = data['elements']
+
+		user = User.query.filter_by(username=username).first()
+		family = Family.query.filter_by(name=family_name).first()
+
+		family_id = family.id
+
+		print('query_lists date_time = {}'.format(type(date_time)))
+
+		list_ = List(family_id=family_id,title=title,date_time=date_time,user=username,elements=elements_json)
+
+		db.session.add(list_)
+		db.session.commit()
+
+		return json.dumps({'status':'success'})
+
+	except Exception as e:
+		print('post_lists ERROR: {}'.format(e))
+		return json.dumps({'status' : 'failure' })
+
+
+@app.route('/query_lists/',methods=['POST'])
+def query_lists():
+	try:
+		JSONstring = json.dumps(request.get_json(force=True))
+		data = json.loads(JSONstring)
+
+		print('query_lists family_name = {}'.format(data['family_name']))
+
+		family_name = data['family_name']
+		family = Family.query.filter_by(name=family_name).first()
+
+		lists = family.lists
+		print('query_lists family.lists: {}'.format(family.lists))
+		
+		lists_list = []
+
+		for list_ in lists:
+			lists_list.append({'id':list_.id,'title' : list_.title,'date_time' :list_.date_time,'user':list_.user,'elements':list_.elements})
+
+		lists_dict = json.dumps({'lists' : lists_list})
+
+		print('query_lists lists JSON:')
+		print(json.dumps(lists_dict))
+
+		return json.dumps({'status':'success','lists':lists_dict})
+
+	except Exception as e:
+		print('query_lists ERROR: {}'.format(e))
+		return json.dumps({'status':'failure'})
+
+@app.route('/delete_lists/',methods=['POST'])
+def delete_lists():
+	try:
+		JSONstring = json.dumps(request.get_json(force=True))
+		data = json.loads(JSONstring)
+
+		id = data['id']
+
+		list_ = List.query.filter_by(id=id).first()
+
+		db.session.delete(list_)
+		db.session.commit()		
+
+		return json.dumps({'status':'success'})
+
+	except Exception as e:
+		print('delete_lists ERROR: {}'.format(e))
+		return json.dumps({'status':'failure'})
+
+def get_current_family():
 	user = User.query.filter_by(username=session['username']).first()
 	print('get_current_family RESULT: {}'.format(user.current_family))
 	return user.current_family
+

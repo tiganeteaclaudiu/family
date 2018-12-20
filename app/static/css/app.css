@@ -499,6 +499,18 @@ body, html {
 	border-bottom: 1px solid gray;
 }
 
+.lists-input {
+	width: 40%;
+	background-color: #2ad4ea;
+	color: white;
+	font-weight: bold;
+	border-bottom: 2px solid white;
+	height: 35px;
+	border: none;
+	margin-top: 1%;
+	border-bottom: 2px solid white;
+}
+
 /* TABLES STYLE */	
 
 .table-styled {
@@ -562,4 +574,14 @@ body, html {
 
  .icon-users:before {
 	background-image: url('../images/icons/users.svg');
+ }
+
+ /* STANDARD FLEXBOX ELEMENTS */
+
+ .flex-start-row {
+ 	width: 100%;
+	height: auto;
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
  }

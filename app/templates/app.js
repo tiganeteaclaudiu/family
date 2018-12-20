@@ -80,6 +80,13 @@ menu_options = {
 						console.log("MERGE FUNCTIA pt reminder!");
 						query_reminders();
 					}
+				},
+				{
+					'name' : 'Lists',
+					'link' : 'family-lists',
+					funct : function() {
+						console.log('merge functia pt lists!');
+					}
 				}
 			]
 	}
@@ -221,15 +228,15 @@ function load_menu_links(menu, menu_option) {
 		e.preventDefault();
 		link = $(this).attr('href');
 
-		// if (link in menu ) {
-		// 	console.log("FOUND AICI ASIDA SDASDASDASDASASD" + link);
-		// 	link2 = link;
-		// 	$('#content_'+link2).css('display','flex');
-		// 	load_sidebar_options(menu_option,link2);
-		// 	add_back_button(menu_option);
-		// 	show_content(link2);
-		// 	return '';
-		// }
+		if (link in menu ) {
+			console.log("FOUND AICI ASIDA SDASDASDASDASASD" + link);
+			link2 = link;
+			$('#content_'+link2).css('display','flex');
+			load_sidebar_options(menu_option,link2);
+			add_back_button(menu_option);
+			show_content(link2);
+			return '';
+		}
 
 		console.log("SHOWING LINK: =========> "+link);
 		show_content(link);
@@ -708,11 +715,159 @@ function load_reminders(reminders) {
 		html += '<td>'+reminders[i]['date_time']+'</td>';
 		html += '<td><input type="checkbox"></td>'
 		html += '</tr>';
-		table.append(html);
-}}
+		element = $(html);
+		table.append(element);
+		load_reminder_event(element);
+	}
+}
 
+function load_reminder_event(element) {
+
+	element.click(function(e) {
+		id = $(this).closest('tr').find('td').first().html();
+		console.log('ID ===============');
+		console.log(id);
+		delete_reminders(id);
+		$(this).remove();
+		setTimeout(query_reminders,2000);
+	});
+
+}
+
+function delete_reminders(id) {
+
+	data = {
+		'id' : id
+	};
+
+	$.ajax({
+		url : '/delete_reminders/',
+		method : 'POST',
+		data: JSON.stringify(data),
+		success: function(data) {
+			data = JSON.parse(data);
+		}
+	});
+}
+
+// -----------------------------FAMILY LISTS
+$('#lists-add-button').click(function(e) {
+	e.preventDefault();
+
+	console.log('WOOOOOOOO');
+	clone =	$("#lists-element-input").clone();
+	
+	clone.appendTo('#family-lists-elements-container');
+	clone.val('');
+});
+
+
+function query_lists() {
+
+	console.log('CURRENT FAMILY = ========123123=======')
+	console.log(current_family);
+
+	data = {
+		'family_name' : return_current_family()
+	}
+
+	$.ajax({
+		url: '/query_lists/',
+		method: 'POST',
+		data: JSON.stringify(data),
+		success: function(data) {
+			console.log("VARUTUUUUUUU");
+			data=JSON.parse(data);
+			if(data['status'] === 'success') {
+				lists = JSON.parse(data['lists']);
+				lists = lists['lists'];
+				
+				load_lists(lists);
+			}
+		}
+	});
+
+}
+
+function jsonify_lists() {
+
+	inputs = $("#family-lists-elements-container > .lists-input");
+	json_object = {'elements' : []};
+
+	console.log("INPUTS: ");
+	console.log(inputs);
+
+	elements = [];
+
+	for(var i=0;i<inputs.length;i++) {
+		value = inputs.eq(i).val();
+
+		if(value !== '') {
+			elements.push(value);
+		}
+	}
+
+	json_object['elements'] = elements;
+
+	return JSON.stringify(json_object)
+
+}
+
+function add_lists() {
+
+	elements = jsonify_lists();
+
+	data = JSON.stringify({
+		'family_name' : current_family,
+		'username' : '{{ username }}',
+		'title' : $("#lists-title-input").val(),
+		'elements' : elements
+	});
+
+	console.log('add_lists data: ');
+	console.log(data);
+
+	$.ajax({
+		url: '/post_lists/',
+		method: 'POST',
+		data: data,
+		success: function(data) {
+			data = JSON.parse(data);
+			query_reminders();
+		}
+	});
+
+}
+
+// function load_reminders(reminders) {
+
+// 	console.log('load_reminders data: '+JSON.stringify(reminders));
+
+// 	table = $("#reminders-table");
+// 	table.find('tr').remove();
+
+// 	for (var i=0;i<=reminders.length-1;i++)	{
+// 		console.log('reminder: '+reminders[i]);
+// 		html = '<tr>';
+// 		html += '<td style="display:none">'+reminders[i]['id']+'</td>';
+// 		html += '<td>'+reminders[i]['body']+'</td>';
+// 		html += '<td>by:'+reminders[i]['user']+'</td>';
+// 		html += '<td>'+reminders[i]['date_time']+'</td>';
+// 		html += '<td><input type="checkbox"></td>'
+// 		html += '</tr>';
+// 		element = $(html);
+// 		table.append(element);
+// 		load_reminder_event(element);
+// 	}
+// }
 
 // ---------------------------- BUTTON EVENTS 
+$("#content-back-button").click(function(e) {
+	e.preventDefault();
+	console.log(current_family);
+	// query_reminders();
+	add_lists();
+});
 
 $("#family-droplist").change(function() {
 	value = $(this).val();
@@ -723,11 +878,6 @@ $("#family-droplist").change(function() {
 	$("#family-droplist").val(value);
 });
 
-$("#content-back-button").click(function(e) {
-	e.preventDefault();
-	console.log(current_family);
-	query_reminders();
-});
 
 $("#create-family-post-button").click(function(e){
 	e.preventDefault();

@@ -26,6 +26,7 @@ class Family(db.Model):
 	members = db.relationship('User',secondary=family_identifier)
 	join_requests = db.relationship('Join_Request', backref='family', lazy=True)
 	reminders = db.relationship('Reminder', backref='family_reminder', lazy=True)
+	lists = db.relationship('List', backref='family_list', lazy=True)
 
 class Join_Request(db.Model):
 	id = db.Column(db.Integer, primary_key = True)
@@ -38,3 +39,11 @@ class Reminder(db.Model):
 	body = db.Column(db.String(100), nullable=False)
 	date_time = db.Column(db.String(100), nullable=False)
 	user = db.Column(db.String(50), nullable=False)
+
+class List(db.Model):
+	id = db.Column(db.Integer, primary_key = True)
+	title = db.Column(db.String(100), nullable=False)
+	elements = db.Column(db.String(1000))
+	user = db.Column(db.String(50), nullable=False)
+	date_time = db.Column(db.String(100), nullable=False)
+	family_id = db.Column(db.Integer, db.ForeignKey('family.id'))

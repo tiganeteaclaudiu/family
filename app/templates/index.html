@@ -242,19 +242,50 @@
 				        <h5 id="join-family-header" style="align-self: flex-start;">Reminders
 				        </h5>
 				        <div class='long-input-container'>
-						    <input type="text" id='reminder-input' class='long-input'>
+						    <input type="text" id='reminder-input' maxlength='140'class='long-input'>
 						    <div class='button-styled' id='reminder-add-button' style="margin-left:3%">
 						        <h5 style="color: white;margin: 0;font-family: Arial;font-weight: bold;">Add</h5>
 						    </div>
 						</div>
 				        <table id='reminders-table' class='table-list'>
 				            <tbody>
+
 				                <tr>
 				                    <td>Grab some milk from the corner store at 7 am then come home
 				                    </td>
 				                    <td>from Claudiu</td>
 				                    <td> at 4 Feb, 10:33AM </td>
 				                </tr>
+				            </tbody>
+				        </table>
+				    </div>
+				</div>
+
+				<div class="content-2col" id="content_family-lists" style="display: none;">
+				    <div class="content-2col-col">
+				        <div class="long-input-container" style="flex-direction: column;height: auto;margin-top: 8%;background-color: #2ad4ea;color: white;">
+						    
+						    <div class='flex-start-row' style='justify-content: center;'>  
+  								<input type="text" id="lists-title-input" placeholder="Title" maxlength="40" class="lists-input">
+							</div>
+						    <div class='flex-start-row' id='family-lists-elements-container' style='margin-top:2%;flex-direction: column;'>
+  								<h5 style="font-weight: bold;font-size: 1.3rem;margin: 5px;align-self:flex-start;">Elements:
+  								</h5>
+  								<input type="text" id="lists-element-input" placeholder="Element" maxlength="140" class="lists-input">
+							</div>
+						    
+						   <div class="flex-start-row" style="justify-content: center;">
+  								<div class="button-styled" id="lists-add-button" style="margin-top: 3%;">
+						        <h5 style="color: white;margin: 0;font-family: Arial;font-weight: bold;font-size: 2rem;">+</h5>
+						    </div><div class="button-styled" id="lists-create-button" style="margin-top: 3%;align-self: flex-end;position: absolute;right: 2%;">
+						        <h5 style="color: white;margin: 0;font-family: Arial;font-weight: bold;font-size: 1,2rem;">Create</h5>
+						    </div>
+  								
+							</div>
+						</div>
+				        <table id="lists-table" class="table-styled">
+				            <tbody>
+				
 				            </tbody>
 				        </table>
 				    </div>
