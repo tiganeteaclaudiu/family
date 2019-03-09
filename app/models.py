@@ -2,8 +2,8 @@ from app import db
 from datetime import datetime
 
 family_identifier = db.Table('family_identifier',
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
-    db.Column('family_id', db.Integer, db.ForeignKey('family.id'))
+	db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+	db.Column('family_id', db.Integer, db.ForeignKey('family.id'))
 )
 
 class User(db.Model):
@@ -27,6 +27,7 @@ class Family(db.Model):
 	join_requests = db.relationship('Join_Request', backref='family', lazy=True)
 	reminders = db.relationship('Reminder', backref='family_reminder', lazy=True)
 	lists = db.relationship('List', backref='family_list', lazy=True)
+	events = db.relationship('Event', backref='family_events', lazy=True)
 
 class Join_Request(db.Model):
 	id = db.Column(db.Integer, primary_key = True)
@@ -46,4 +47,13 @@ class List(db.Model):
 	elements = db.Column(db.String(1000))
 	user = db.Column(db.String(50), nullable=False)
 	date_time = db.Column(db.String(100), nullable=False)
+	family_id = db.Column(db.Integer, db.ForeignKey('family.id'))
+
+
+class Event(db.Model):
+	id = db.Column(db.Integer, primary_key = True)
+	title = db.Column(db.String(100), nullable=False)
+	description = db.Column(db.String(300), nullable=True)
+	start = db.Column(db.String(100), nullable=False)
+	end = db.Column(db.String(100), nullable=False)
 	family_id = db.Column(db.Integer, db.ForeignKey('family.id'))

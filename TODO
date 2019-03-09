@@ -11,5 +11,21 @@ TODO: 1DEC:
 	- SIDE MENU -- DONE
 	- IMPLEMENT BETTER SYSTEM FOR TABS (LIKE IN ITRON-WEB-DM)
 	- IMPLEMENT JOIN REQUESTS FOR FAMILIES
-	- 
+	-
 
+TODO: 9 MARCH:
+
+	- test whole family system again
+
+	- Calendar:
+		- make db models
+		- make event input window
+		- make set/get event methods, both server and client
+		- make event update window
+		- make delete event methods on both server and client
+
+WHAT I DID: 9 MARCH
+
+	-reminder delete checkbox
+	-list delete button
+	-list reset element inputs on clicking close button

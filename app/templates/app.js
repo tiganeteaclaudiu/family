@@ -86,6 +86,15 @@ menu_options = {
 					'link' : 'family-lists',
 					funct : function() {
 						console.log('merge functia pt lists!');
+						query_lists();
+					}
+				},
+				{
+					'name' : 'Calendar',
+					'link' : 'family-calendar',
+					funct : function() {
+						console.log("MERGE FUNCTIA pt reminder!");
+						query_events();
 					}
 				}
 			]
@@ -137,7 +146,7 @@ function hide_all_content() {
 }
 
 //Function adding sidebar options
-//Supports adding sidebar options by either clicking items on the top menu or 
+//Supports adding sidebar options by either clicking items on the top menu or
 // items on the sidebar
 
 //menu_options format:
@@ -171,7 +180,7 @@ function load_sidebar_options(menu_option,sidebar_option) {
 			for (var i=0;i<=sidebar_options.length-1;i++) {
 
 				console.log('load_sidebar_options sidebar[i]:' + JSON.stringify(sidebar_options[i]));
-				
+
 				option = sidebar_options[i];
 
 				name = option['name'];
@@ -280,7 +289,7 @@ $("#join-family-switch-button").click(function(e) {
 		$("#join-family-name-row").css("display","flex");
 		$("#join-family-switch-button").html('Search by ID');
 	}
-}); 
+});
 
 $("#family-create-button").click(function(e) {
 	e.preventDefault();
@@ -450,7 +459,7 @@ function query_families(query_type, table_id, popup_url) {
 					if(popup_url !== '') {
 						refresh_cursor_button_event(table_id,popup_url);
 					}
-					
+
 
 				} else {
 					console.log('NO FAMILIES');
@@ -489,7 +498,7 @@ function query_join_requests() {
 			$("#join-requests-table").append(html);
 
 			for( var i=0;i<data.length;i++ ) {
-				
+
 				family = data[i]['family'];
 				requests = data[i]['requests'];
 
@@ -618,6 +627,7 @@ function set_current_family(name) {
 		success: function(data) {
 			data = JSON.parse(data);
 			current_family = name;
+			location.reload(0);
 		}
 	});
 }
@@ -668,7 +678,7 @@ function query_reminders() {
 			if(data['status'] === 'success') {
 				reminders = JSON.parse(data['reminders']);
 				reminders = reminders['reminders'];
-				
+
 				load_reminders(reminders);
 			}
 		}
@@ -709,27 +719,28 @@ function load_reminders(reminders) {
 	for (var i=0;i<=reminders.length-1;i++)	{
 		console.log('reminder: '+reminders[i]);
 		html = '<tr>';
-		html += '<td style="display:none">'+reminders[i]['id']+'</td>';
+		html += '<td style="display:none">'+i+'</td>';
 		html += '<td>'+reminders[i]['body']+'</td>';
 		html += '<td>by:'+reminders[i]['user']+'</td>';
 		html += '<td>'+reminders[i]['date_time']+'</td>';
-		html += '<td><input type="checkbox"></td>'
 		html += '</tr>';
 		element = $(html);
+		var delete_checkbox = $('<td>Delete:<input type="checkbox" style="margin-left:5px;"></td>');
 		table.append(element);
-		load_reminder_event(element);
+		element.append(delete_checkbox);
+		load_reminder_event(delete_checkbox, element);
 	}
 }
 
-function load_reminder_event(element) {
+function load_reminder_event(element_to_click, element_to_delete) {
 
-	element.click(function(e) {
+	element_to_click.click(function(e) {
 		id = $(this).closest('tr').find('td').first().html();
 		console.log('ID ===============');
 		console.log(id);
 		delete_reminders(id);
-		$(this).remove();
-		setTimeout(query_reminders,2000);
+		element_to_delete.remove();
+		setTimeout(query_reminders,500);
 	});
 
 }
@@ -737,7 +748,8 @@ function load_reminder_event(element) {
 function delete_reminders(id) {
 
 	data = {
-		'id' : id
+		'id' : id,
+		'family_name' : current_family
 	};
 
 	$.ajax({
@@ -756,7 +768,7 @@ $('#lists-add-button').click(function(e) {
 
 	console.log('WOOOOOOOO');
 	clone =	$("#lists-element-input").clone();
-	
+
 	clone.appendTo('#family-lists-elements-container');
 	clone.val('');
 });
@@ -781,12 +793,111 @@ function query_lists() {
 			if(data['status'] === 'success') {
 				lists = JSON.parse(data['lists']);
 				lists = lists['lists'];
-				
+
 				load_lists(lists);
 			}
 		}
 	});
 
+}
+
+function load_lists(lists) {
+
+	$("#family-lists-table").find('td').remove();
+
+	for(var i=0;i<lists.length;i++) {
+		id =lists[i]['id'];
+		title = lists[i]['title'];
+		date_time = lists[i]['date_time'];
+		date_time = date_time.substr(0,10);
+		user = lists[i]['user'];
+		elements = JSON.parse(lists[i]['elements'])['elements'];
+
+		html = '<tr class="family-lists-table-row">';
+		// html = '<td style="display:none">'+id+'</td>';
+		html += '<td>'+i+'</td>';
+		html += '<td>'+title+'</td>';
+		html += '<td>'+user+'</td>';
+		html += '<td>'+date_time+'</td>';
+		html += '</tr>';
+
+		new_row = $(html);
+
+		var delete_button = $('<td>X</td>');
+		new_row.append(delete_button);
+
+		//load delete button event
+		load_list_remove_events(delete_button, new_row);
+
+		$("#family-lists-table").append(new_row);
+
+		for(var j=0;j<elements.length;j++) {
+			console.log(elements[j]);
+			html = `<tr class='family-lists-element' style="display:none;background-color: #2ad4ea;width: 100%;">
+				<td>`+(elements.length-j)+`</td>
+				<td>`+elements[j]+`</td>
+				<td></td>
+				<td></td>
+			</tr>`;
+
+			new_element_row = $(html);
+
+			new_element_row.insertAfter(new_row);
+		}
+			new_row.closest('tr').next().addClass('inset-shadow');
+	}
+
+	load_lists_events();
+
+}
+
+function load_lists_events() {
+	$(".family-lists-table-row").click(function(e) {
+		e.preventDefault();
+		console.log('clicked:');
+		console.log($(this));
+		elements = $(this).nextUntil('.family-lists-table-row');
+		if($(this).closest('tr').next().css('display') === 'none') {
+			elements.show();
+		} else {
+			elements.hide();
+		}
+	});
+
+}
+
+function load_list_remove_events(element_to_click, element_to_delete) {
+	element_to_click.click(function(e) {
+		id = $(this).closest('tr').find('td').first().html();
+		console.log('clicked remove list');
+		console.log(id);
+		delete_list(id);
+
+		element_rows = $(element_to_delete).nextUntil('.family-lists-table-row');
+		element_rows.remove();
+
+		element_to_delete.remove();
+		console.log('removed');
+		// setTimeout(query_reminders,2000);
+	});
+}
+
+function delete_list(id) {
+
+	data = {
+		'id' : id,
+		'family_name' : current_family
+	};
+
+	$.ajax({
+		url : '/delete_lists/',
+		method : 'POST',
+		data: JSON.stringify(data),
+		success: function(data) {
+			data = JSON.parse(data);
+			query_lists();
+		}
+	});
 }
 
 function jsonify_lists() {
@@ -825,43 +936,236 @@ function add_lists() {
 	});
 
 	console.log('add_lists data: ');
-	console.log(data);
+	console.log(elements);
+
+	title = $("#lists-title-input").val();
+
+	if(title === '') {
+		alert('Please insert a title to your new list.');
+	} else {
+		//check if list of elements is empty
+
+		if (elements === '{"elements":[]}') {
+			alert('Please insert at least one item in elements list.')
+		} else {
+			//list is good to add
+			$.ajax({
+				url: '/post_lists/',
+				method: 'POST',
+				data: data,
+				success: function(data) {
+					data = JSON.parse(data);
+					query_lists();
+				}
+			});
+		}
+
+	}
+
+}
+
+function reload_list_input() {
+		inputs =	$('[id="lists-element-input"]');
+		inputs.remove();
+		new_input = $('<input type="text" id="lists-element-input" placeholder="Element" maxlength="140" class="lists-input">');
+		$("#family-lists-elements-container").append(new_input);
+}
+
+
+//------------------------------- FAMILY CALENDAR
+//
+// $('#calendar').fullCalendar({
+//     selectable: true,
+//     header: {
+//       left: '',
+//       center: 'title',
+//       left: 'prev,next today'
+//     },
+//     dayClick: function(date) {
+//       alert('clicked ' + date.format());
+//     },
+//     select: function(startDate, endDate) {
+//       alert('selected ' + startDate.format() + ' to ' + endDate.format());
+//     },
+// 		events: [
+// 			{
+// 				title  : 'event1',
+// 				start  : '2019-02-01',
+// 				description: 'This is a cool event'
+// 			},
+// 			{
+// 				title  : 'eventtesttestestewst',
+// 				start  : '2019-02-01'
+// 			},
+// 			{
+// 				title  : 'event2',
+// 				start  : '2019-02-05',
+// 				end    : '2019-02-07'
+// 			},
+// 			{
+// 				title  : 'event3',
+// 				start  : '2019-02-09T12:30:00',
+// 				allDay : false // will make the time show
+// 			}
+// 		]
+//   }
+//   );
+
+var myevents =  [
+	{
+		title  : 'event1',
+		start  : '2019-02-01',
+		description: 'This is a cool event'
+	},
+	{
+		title  : 'eventtesttestestewst',
+		start  : '2019-02-01',
+		description: 'This is a cool event'
+	},
+	{
+		title  : 'event2',
+		start  : '2019-02-05',
+		end    : '2019-02-07',
+		description: 'This is a cool event'
+	},
+	{
+		title  : 'event3',
+		start  : '2019-02-09T12:30:00',
+		description: 'This is a cool event',
+		allDay : false // will make the time show
+	}
+];
+
+var today_date = moment().format('YYYY-MM-DD');
+console.log(today_date);
+// $('#calendar').fullCalendar('gotoDate', today_date);
+$('#calendar').fullCalendar({
+    theme: false,
+    header: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'month,basicWeek'
+        // right: 'month,basicWeek,basicDay'
+    },
+    // header: { center: 'month,agendaWeek' }, // buttons for switching between views
+    defaultDate: today_date,
+    businessHours:
+     {
+        rendering: 'inverse-background',
+        dow: [0,1]
+     },
+    editable: false,
+    eventLimit: true, // allow "more" link when too many events
+    events: myevents,
+    eventRender: function (event, element) {
+           element.attr('href', 'javascript:void(0);');
+           element.click(function() {
+	 						console.log('desc: '+event.description);
+	 						console.log('title '+event.title);
+
+           });
+       },
+		selectable : true,
+		dayClick: function(date) {
+      // alert('clicked ' + date.format());
+			show_event_input(date.format(),  date.format());
+    },
+    select: function(startDate, endDate) {
+      // alert('selected ' + startDate.format() + ' to ' + endDate.format());
+			show_event_input(startDate.format(),  endDate.format());
+    }
+	});
+
+function show_event_input(startDate, endDate) {
+	start_date_field = $("#event-start-date");
+	end_date_field = $("#event-end-date");
+
+	console.log(start_date_field);
+	console.log(end_date_field);
+
+	start_date_field.html(startDate);
+	end_date_field.html(endDate);
+
+	$("#family-event-create-wrapper").css('display','flex');
+}
+
+$("#event-create-button").click(function() {
+	create_calendar_event();
+})
+
+function create_calendar_event() {
+	console.log('entered create_event');
+
+	start_date = $("#event-start-date").html();
+	end_date = $("#event-end-date").html();
+	event_title = $("#event-title-input").val();
+	event_description = $("#events-description-input").val();
+
+	data = JSON.stringify({
+		'start_date' : start_date,
+		'end_date' : end_date,
+		'event_title' : event_title,
+		'event_description' : event_description
+	});
 
 	$.ajax({
-		url: '/post_lists/',
+		url: '/post_events/',
 		method: 'POST',
 		data: data,
 		success: function(data) {
 			data = JSON.parse(data);
-			query_reminders();
+			if(data['status'] === 'success') {
+				// setTimeout(load_family_droplist,1000);
+			}
 		}
 	});
 
 }
 
-// function load_reminders(reminders) {
 
-// 	console.log('load_reminders data: '+JSON.stringify(reminders));
+function query_events() {
 
-// 	table = $("#reminders-table");
-// 	table.find('tr').remove();
+	console.log('CURRENT FAMILY = ========123123=======')
+	console.log(current_family);
 
-// 	for (var i=0;i<=reminders.length-1;i++)	{
-// 		console.log('reminder: '+reminders[i]);
-// 		html = '<tr>';
-// 		html += '<td style="display:none">'+reminders[i]['id']+'</td>';
-// 		html += '<td>'+reminders[i]['body']+'</td>';
-// 		html += '<td>by:'+reminders[i]['user']+'</td>';
-// 		html += '<td>'+reminders[i]['date_time']+'</td>';
-// 		html += '<td><input type="checkbox"></td>'
-// 		html += '</tr>';
-// 		element = $(html);
-// 		table.append(element);
-// 		load_reminder_event(element);
-// 	}
-// }
+	$.ajax({
+		url: '/query_events/',
+		method: 'POST',
+		data: JSON.stringify(data),
+		success: function(data) {
+			console.log("query_events result:");
+			console.log(JSON.parse(data));
+			data=JSON.parse(data);
+			events = JSON.parse(data['events']);
 
-// ---------------------------- BUTTON EVENTS 
+			console.log('events ==============')
+			console.log(events);
+
+			load_calendar_events(events['events']);
+		}
+	});
+
+}
+
+function load_calendar_events(events) {
+	console.log('events ==============22')
+	console.log(events);
+
+	$("#calendar").fullCalendar('removeEvents');
+
+	// $('#calendar').fullCalendar('updateEvents', events);
+
+	for(var i = 0; i< events.length; i++) {
+		console.log('I '+i);
+		$('#calendar').fullCalendar('renderEvent', {
+	              title: events[i]['title'],
+	              start: events[i]['start'],
+								end: events[i]['end']
+	            });
+	}
+}
+
+// ---------------------------- BUTTON EVENTS
 $("#content-back-button").click(function(e) {
 	e.preventDefault();
 	console.log(current_family);
@@ -876,6 +1180,7 @@ $("#family-droplist").change(function() {
 	set_current_family(value);
 
 	$("#family-droplist").val(value);
+
 });
 
 
@@ -926,5 +1231,31 @@ $("#reminder-add-button").click(function(e) {
 	add_reminders(reminder_body);
 
 })
+
+$("#lists-close-button").click(function(e) {
+	e.preventDefault();
+	reload_list_input();
+	$("#family-lists-create-container").hide();
+	$("#lists-create-container-button").show();
+});
+
+$("#lists-create-container-button").click(function(e) {
+	e.preventDefault();
+	$("#family-lists-create-container").css('display','flex');
+	$(this).hide();
+});
+
+$("#lists-create-button").click(function(e) {
+	e.preventDefault();
+	add_lists();
+});
+
+//calendar buttons
+$("#event-input-close-button").click(function(e) {
+	e.preventDefault();
+	// reload_list_input();
+	$("#family-event-create-wrapper").hide();
+});
+
 
 });

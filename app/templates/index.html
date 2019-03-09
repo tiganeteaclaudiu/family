@@ -17,6 +17,19 @@
 
         <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.js') }}"></script>
 
+        <script type='text/javascript' src='{{ url_for("static", filename="js/moment.js") }}'></script>
+
+        <script type='text/javascript' src='{{ url_for("static", filename="js/fullcalendar.js") }}'></script>
+        <!-- <script type='text/javascript' src='{{ url_for("static", filename="js/fullcalendar.min.js") }}'></script>
+        <script type='text/javascript' src='{{ url_for("static", filename="js/gcal.js") }}'></script>
+        <script type='text/javascript' src='{{ url_for("static", filename="js/gcal.min.js") }}'></script>
+        <script type='text/javascript' src='{{ url_for("static", filename="js/locale-all.js") }}'></script> -->
+
+        <link href="{{ url_for('static', filename='css/fullcalendar.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/fullcalendar.min.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/fullcalendar.print.css') }}" media="print" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/fullcalendar.print.min.css') }}" rel="stylesheet">
+
         <script>
 
         	{% include 'app.js' %}
@@ -53,7 +66,7 @@
 		</div>
 	</div>
 	<div id='content-container'>
-		
+
 
 		<div id="side-menu">
 			<div id='side-menu-header'>Main Panel</div>
@@ -75,9 +88,9 @@
 					<div id='no-family-image' style='margin-right:-20%;'>
 						<img src="../static/images/family.png" style="width: 70%;" class="img-responsive pull-right">
 						<div id='logo-credit'>
-							<p>Icons made by 
-								<a href="https://www.freepik.com/" title="Freepik">Freepik</a> from 
-								<a href="https://www.flaticon.com/" 			    title="Flaticon">www.flaticon.com</a> is licensed by 
+							<p>Icons made by
+								<a href="https://www.freepik.com/" title="Freepik">Freepik</a> from
+								<a href="https://www.flaticon.com/" 			    title="Flaticon">www.flaticon.com</a> is licensed by
 								<a href="http://creativecommons.org/licenses/by/3.0/" 			    title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY
 								</a>
 							</p>
@@ -96,9 +109,9 @@
 					<div id='no-family-image' style='margin-right:-20%;'>
 						<img src="../static/images/family.png" style="width: 70%;" class="img-responsive pull-right">
 						<div id='logo-credit'>
-							<p>Icons made by 
-								<a href="https://www.freepik.com/" title="Freepik">Freepik</a> from 
-								<a href="https://www.flaticon.com/" 			    title="Flaticon">www.flaticon.com</a> is licensed by 
+							<p>Icons made by
+								<a href="https://www.freepik.com/" title="Freepik">Freepik</a> from
+								<a href="https://www.flaticon.com/" 			    title="Flaticon">www.flaticon.com</a> is licensed by
 								<a href="http://creativecommons.org/licenses/by/3.0/" 			    title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY
 								</a>
 							</p>
@@ -137,7 +150,7 @@
 
 			        <table id="families-table" class='table-styled'>
 			            <tbody style="">
-			              
+
 			            </tbody>
 			        </table>
 
@@ -152,7 +165,7 @@
 
 			<div class="content-2col" id="content_create-family" style="display: none;">
 				<div class="content-2col-col" style="justify-content: space-evenly;height: 56%;width: 42%;">
-			    	
+
 			        <input id="create-family-name" type="text" placeholder="Name" class="input-styled" style="width: 60%;margin-right: 5%;">
 			        <input id="create-family-country" type="text" placeholder="Country" class="input-styled" style="width: 60%;margin-right: 5%;">
 			        <input id="create-family-location" type="text" placeholder="Location" class="input-styled" style="width: 60%;margin-right: 5%;">
@@ -186,9 +199,9 @@
 						<div id='no-family-image' style='margin-right:-20%;'>
 							<img src="../static/images/family.png" style="width: 70%;" class="img-responsive pull-right">
 							<div id='logo-credit'>
-								<p>Icons made by 
-									<a href="https://www.freepik.com/" title="Freepik">Freepik</a> from 
-									<a href="https://www.flaticon.com/" 			    title="Flaticon">www.flaticon.com</a> is licensed by 
+								<p>Icons made by
+									<a href="https://www.freepik.com/" title="Freepik">Freepik</a> from
+									<a href="https://www.flaticon.com/" 			    title="Flaticon">www.flaticon.com</a> is licensed by
 									<a href="http://creativecommons.org/licenses/by/3.0/" 			    title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY
 									</a>
 								</p>
@@ -232,7 +245,6 @@
 				        <h5 id="join-family-header" style="align-self: flex-start;">Leave family:</h5>
 				        <p style=";font-size: 1.3rem;margin-top: 10px;"> Select a family to leave. <b>You can ask to join back anytime!</b></p>
 				        <table id="leave-family-table" class='table-styled' style="margin-top: 0%;">
-				       
 				        </table>
 				    </div>
 				</div>
@@ -263,32 +275,89 @@
 
 				<div class="content-2col" id="content_family-lists" style="display: none;">
 				    <div class="content-2col-col">
-				        <div class="long-input-container" style="flex-direction: column;height: auto;margin-top: 8%;background-color: #2ad4ea;color: white;">
-						    
-						    <div class='flex-start-row' style='justify-content: center;'>  
+				    	<div class="button-styled" id="lists-create-container-button" style="align-self: flex-end;right: 2%;margin-top: 5%;margin-bottom: -10%;">
+						        <h5 style="color: white;margin: 0;font-family: Arial;font-weight: bold;font-size: 2rem;">+</h5>
+						    </div>
+				        <div class="long-input-container" id='family-lists-create-container' style="display:none;flex-direction: column;height: auto;margin-top: 8%;background-color: #2ad4ea;color: white;">
+
+						    <div class='flex-start-row' style='justify-content: center;'>
   								<input type="text" id="lists-title-input" placeholder="Title" maxlength="40" class="lists-input">
 							</div>
 						    <div class='flex-start-row' id='family-lists-elements-container' style='margin-top:2%;flex-direction: column;'>
-  								<h5 style="font-weight: bold;font-size: 1.3rem;margin: 5px;align-self:flex-start;">Elements:
+  								<h5 style="font-weight: bold;font-size: 1.3rem;margin: 5px;align-self:flex-start;margin-left:15%;">Elements:
   								</h5>
   								<input type="text" id="lists-element-input" placeholder="Element" maxlength="140" class="lists-input">
 							</div>
-						    
+
 						   <div class="flex-start-row" style="justify-content: center;">
   								<div class="button-styled" id="lists-add-button" style="margin-top: 3%;">
 						        <h5 style="color: white;margin: 0;font-family: Arial;font-weight: bold;font-size: 2rem;">+</h5>
-						    </div><div class="button-styled" id="lists-create-button" style="margin-top: 3%;align-self: flex-end;position: absolute;right: 2%;">
-						        <h5 style="color: white;margin: 0;font-family: Arial;font-weight: bold;font-size: 1,2rem;">Create</h5>
-						    </div>
-  								
+							    </div>
+							    <div class="button-styled" id="lists-create-button" style="margin-top: 3%;align-self: flex-end;position: absolute;right: 2%;">
+							        <h5 style="color: white;margin: 0;font-family: Arial;font-weight: bold;font-size: 1,2rem;">Create
+							        </h5>
+							    </div>
 							</div>
+							<div class="button-styled" id="lists-close-button" style="align-self: flex-end;position: absolute;right: 2%;background-color: inherit;">
+						        <h5 style="color: white;margin: 0;font-family: Arial;font-weight: bold;font-size: 2rem;">X</h5>
+						    </div>
 						</div>
-				        <table id="lists-table" class="table-styled">
-				            <tbody>
-				
-				            </tbody>
-				        </table>
+				        <table id="family-lists-table" class="table-styled" style="width:120%;margin-top: 15%;">
+
+				        <tr>
+                    <th> # </th>
+                    <th> Title </th>
+                    <th> User </th>
+                    <th> Time </th>
+                </tr>
+
+					      </table>
 				    </div>
+				</div>
+
+        <div class="content-2col" id="content_family-calendar" style="display: none;">
+          <!-- <div id='calendar'></div> -->
+				    <div class="content-2col-col">
+				        <h5 id="join-family-header" style="align-self: flex-start;">Calendar
+				        </h5>
+
+                <div id='calendar'></div>
+
+						</div>
+
+            <div class="content-2col-col" id='family-event-create-wrapper' style="position: absolute;z-index: 30;top: 20%;display:none;">
+
+  				    <div class="long-input-container" id="family-event-create-container" style="display:flex;flex-direction: column;height: auto;margin-top: 8%;background-color: #2ad4ea;color: white;">
+
+                <div class="flex-start-row" style="justify-content: center;align-items: center;display: flex;position: relative;flex-direction:column;">
+    								<h5 style="font-weight: bold;font-size: 1.3rem;margin: 5px;position: absolute;left: 20%;">Start Date:</h5>
+                    <h4 style='margin: 0;' id='event-start-date'></h4>
+                </div>
+
+                <div class="flex-start-row" style="justify-content: center;align-items: center;display: flex;position: relative;flex-direction:column;">
+    								<h5 style="font-weight: bold;font-size: 1.3rem;margin: 5px;position: absolute;left: 20%;">End Date:</h5>
+                    <h4 style='margin: 0;' id='event-end-date'></h4>
+                </div>
+
+  						    <div class="flex-start-row" style="justify-content: center;margin-top:5%;">
+    								<input type="text" id="event-title-input" placeholder="Title" maxlength="40" style='width:60%;' class="lists-input">
+  							</div>
+  						    <div class="flex-start-row" id="family-events-elements-container" style="margin-top:2%;flex-direction: column;">
+    								<textarea type="text" id="events-description-input" maxlength="300" class="lists-input" placeholder="Description" style='width:60%;height:auto;'></textarea>
+  							</div>
+
+  						   <div class="flex-start-row" style="justify-content: center;">
+  							    <div class="button-styled" id="event-create-button" style="margin-top: 3%;align-self: flex-end;position: absolute;right: 2%;">
+  							        <h5 style="color: white;margin: 0;font-family: Arial;font-weight: bold;font-size: 1,2rem;">Create
+  							        </h5>
+  							    </div>
+  							</div>
+  							<div class="button-styled" id="event-input-close-button" style="align-self: flex-end;position: absolute;right: 2%;background-color: inherit;">
+  						        <h5 style="color: white;margin: 0;font-family: Arial;font-weight: bold;font-size: 2rem;">X</h5>
+  						    </div>
+  						</div>
+          </div>
+
 				</div>
 
 			</div>

@@ -4,7 +4,7 @@ username = {{ username }};
 console.log('user!: '+username);
 
 function init_variables(username) {
-	
+
 	$.ajax({
 		url: '/get_username/',
 		method: 'POST',
@@ -51,7 +51,7 @@ $("#join-family-switch-button").click(function(e) {
 		$("#join-family-name-row").css("display","flex");
 		$("#join-family-switch-button").html('Search by ID');
 	}
-}); 
+});
 
 $(document).click(function(e) {
     if ($(e.target).is('#families-table td')) {

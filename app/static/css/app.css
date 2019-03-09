@@ -44,6 +44,27 @@ body, html {
 	justify-content: flex-end;
 }
 
+
+.fc-right {
+	display:block;
+}
+
+.fc-button-group {
+	display: block !important;
+}
+
+.fc-next-button {
+	display: block !important;
+}
+
+.fc-prev-button {
+	display: block !important;
+}
+
+.fc-bg {
+	display:contents !important;
+}
+
 #content {
 	width: 85%;
 	height: 100%;
@@ -53,6 +74,17 @@ body, html {
     justify-content: flex-start;
     align-items: center;
 }
+
+#login-content {
+	width: 100%;
+	height: 100%;
+	position: relative;
+	display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+}
+
 
 .content-2col {
 
@@ -84,6 +116,7 @@ body, html {
 	align-items: center;
 	padding-left: 2%;
 	position: absolute;
+	z-index: -1;
 }
 
 #content-header {
@@ -511,7 +544,7 @@ body, html {
 	border-bottom: 2px solid white;
 }
 
-/* TABLES STYLE */	
+/* TABLES STYLE */
 
 .table-styled {
 	width: 100%;
@@ -555,6 +588,12 @@ body, html {
     margin: 0;
     margin-right: 11px;
 
+}
+
+.inset-shadow {
+	-webkit-box-shadow: inset 0 7px 9px -7px rgba(0,0,0,0.7);
+	-moz-box-shadow: inset 0 7px 9px -7px rgba(0,0,0,0.7);
+	box-shadow: inset 0 7px 9px -7px rgba(0,0,0,0.7);
 }
 
 /* ICONS */

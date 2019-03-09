@@ -1,7 +1,7 @@
 from app import app
 from app import db
 from flask import render_template,request, session, redirect, url_for
-from app.models import User, Family, Join_Request, family_identifier, Reminder, List
+from app.models import User, Family, Join_Request, family_identifier, Reminder, List, Event
 from functools import wraps
 import json
 import datetime
@@ -140,7 +140,7 @@ def post_family():
 def add_family_member():
 	JSONstring = json.dumps(request.get_json(force=True))
 	data = json.loads(JSONstring)
-	
+
 	username = data['username']
 	family_name = data['family']
 
@@ -343,7 +343,7 @@ def accept_join_request():
 	return ''
 
 @app.route('/leave_family/',methods=['POST'])
-def leave_family():	
+def leave_family():
 	JSONstring = json.dumps(request.get_json(force=True))
 	data = json.loads(JSONstring)
 
@@ -412,7 +412,7 @@ def get_current_family():
 		user = User.query.filter_by(username=username).first()
 
 		current_family_id = user.current_family
-		
+
 		family = Family.query.filter_by(id=current_family_id).first()
 
 		if family == None:
@@ -424,7 +424,7 @@ def get_current_family():
 
 	except Exception as e:
 		print('get_current_family ERROR: {}'.format(e))
-		
+
 		return json.dumps({'status' : 'failure'})
 
 @app.route('/post_reminders/',methods=['POST'])
@@ -470,7 +470,7 @@ def query_reminders():
 
 		reminders = family.reminders
 		print('query_reminders family.reminders: {}'.format(family.reminders))
-		
+
 		reminders_list = []
 
 		for reminder in reminders:
@@ -495,10 +495,15 @@ def delete_reminders():
 
 		id = data['id']
 
-		reminder = Reminder.query.filter_by(id=id).first()
+		family_name = data['family_name']
+		family = Family.query.filter_by(name=family_name).first()
+
+		print('========='+id)
+
+		reminder = family.reminders[int(id)]
 
 		db.session.delete(reminder)
-		db.session.commit()		
+		db.session.commit()
 
 		return json.dumps({'status':'success'})
 
@@ -550,7 +555,7 @@ def query_lists():
 
 		lists = family.lists
 		print('query_lists family.lists: {}'.format(family.lists))
-		
+
 		lists_list = []
 
 		for list_ in lists:
@@ -574,11 +579,23 @@ def delete_lists():
 		data = json.loads(JSONstring)
 
 		id = data['id']
+		print('got here1')
+		print(id)
 
-		list_ = List.query.filter_by(id=id).first()
+		# list = List.query.filter_by(id=id).first()
 
-		db.session.delete(list_)
-		db.session.commit()		
+		family_name = data['family_name']
+		family = Family.query.filter_by(name=family_name).first()
+
+		list = family.lists[int(id)]
+
+		print('got here2')
+		print(list)
+
+		db.session.delete(list)
+		db.session.commit()
+
+		print('got here3')
 
 		return json.dumps({'status':'success'})
 
@@ -586,8 +603,62 @@ def delete_lists():
 		print('delete_lists ERROR: {}'.format(e))
 		return json.dumps({'status':'failure'})
 
+#======================== CALENDAR methods
+
+@app.route('/post_events/',methods=['POST'])
+def post_events():
+	try:
+		JSONstring = json.dumps(request.get_json(force=True))
+		data = json.loads(JSONstring)
+
+		start_date = data['start_date']
+		end_date = data['end_date']
+		event_title = data['event_title']
+		event_description = data['event_description']
+
+		user = User.query.filter_by(username=session['username']).first()
+		family_id = get_current_family()
+
+		event = Event(family_id=family_id,title=event_title,start=start_date,end=end_date,description=event_description)
+
+		db.session.add(event)
+		db.session.commit()
+
+		return json.dumps({'status':'success'})
+
+	except Exception as e:
+		print('post_lists ERROR: {}'.format(e))
+		return json.dumps({'status' : 'failure' })
+
+@app.route('/query_events/',methods=['POST'])
+def query_events():
+	try:
+		JSONstring = json.dumps(request.get_json(force=True))
+		data = json.loads(JSONstring)
+
+		family_id = get_current_family()
+		family = Family.query.filter_by(id=family_id).first()
+
+		events = family.events
+		print('query_events family.events: {}'.format(family.events))
+
+		events_list = []
+
+		for event in events:
+			events_list.append({"id":event.id,"title" : event.title,"description" :event.description,"start":event.start,"end":event.end})
+
+		events_dict = json.dumps({"events" : events_list})
+
+		print('query_events events JSON:')
+		print(json.dumps(events_dict))
+
+		return json.dumps({'status':'success','events':events_dict})
+
+	except Exception as e:
+		print('query_events ERROR: {}'.format(e))
+		return json.dumps({'status':'failure'})
+
 def get_current_family():
 	user = User.query.filter_by(username=session['username']).first()
 	print('get_current_family RESULT: {}'.format(user.current_family))
 	return user.current_family
-
