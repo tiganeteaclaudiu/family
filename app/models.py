@@ -52,6 +52,7 @@ class List(db.Model):
 
 class Event(db.Model):
 	id = db.Column(db.Integer, primary_key = True)
+	user = db.Column(db.String(100), )
 	title = db.Column(db.String(100), nullable=False)
 	description = db.Column(db.String(300), nullable=True)
 	start = db.Column(db.String(100), nullable=False)

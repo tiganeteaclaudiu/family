@@ -615,6 +615,10 @@ body, html {
 	background-image: url('../images/icons/users.svg');
  }
 
+ .icon-chat:before {
+	background-image: url('../images/icons/messages.svg');
+ }
+
  /* STANDARD FLEXBOX ELEMENTS */
 
  .flex-start-row {

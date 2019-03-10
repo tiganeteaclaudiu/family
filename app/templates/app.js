@@ -3,8 +3,34 @@ username = '{{ username }}';
 
 console.log('user!: '+username);
 
+console.log(document.domain + ':' + location.port);
 
 jQuery(document).ready(function(){
+
+	var socket = io.connect('http://' + document.domain + ':' + location.port);
+	socket.on('connect', function() {
+	    socket.emit('message', {data: 'I\'m connected!'});
+	});
+
+	$("#footer").click(function() {
+		console.log('clicked footer');
+    socket.emit('join', {room: 'testroom', username: username});
+	});
+
+	$("#side-menu-header").click(function() {
+		console.log('clicked logo');
+    socket.emit('leave', {room: 'testroom', username: username});
+	});
+
+	$("#header").click(function() {
+		console.log('clicked header');
+		socket.emit('askformessage', {});
+	});
+
+  socket.on('chat message', function(msg){
+    console.log('MESSAGE: ' + msg);
+  });
+
 
 current_family = '';
 
@@ -1011,30 +1037,6 @@ function reload_list_input() {
 //   }
 //   );
 
-var myevents =  [
-	{
-		title  : 'event1',
-		start  : '2019-02-01',
-		description: 'This is a cool event'
-	},
-	{
-		title  : 'eventtesttestestewst',
-		start  : '2019-02-01',
-		description: 'This is a cool event'
-	},
-	{
-		title  : 'event2',
-		start  : '2019-02-05',
-		end    : '2019-02-07',
-		description: 'This is a cool event'
-	},
-	{
-		title  : 'event3',
-		start  : '2019-02-09T12:30:00',
-		description: 'This is a cool event',
-		allDay : false // will make the time show
-	}
-];
 
 var today_date = moment().format('YYYY-MM-DD');
 console.log(today_date);
@@ -1056,42 +1058,112 @@ $('#calendar').fullCalendar({
      },
     editable: false,
     eventLimit: true, // allow "more" link when too many events
-    events: myevents,
     eventRender: function (event, element) {
            element.attr('href', 'javascript:void(0);');
            element.click(function() {
+						 console.log(event);
 	 						console.log('desc: '+event.description);
 	 						console.log('title '+event.title);
+							console.log('ID XXXXXXX=--====== '+event.id);
 
+							show_event_input(event);
            });
        },
 		selectable : true,
 		dayClick: function(date) {
       // alert('clicked ' + date.format());
-			show_event_input(date.format(),  date.format());
+			show_event_input({'start' : date, 'end' : date});
     },
     select: function(startDate, endDate) {
       // alert('selected ' + startDate.format() + ' to ' + endDate.format());
-			show_event_input(startDate.format(),  endDate.format());
+			show_event_input({'start' : startDate, 'end' : endDate});
     }
 	});
 
-function show_event_input(startDate, endDate) {
+function show_event_input(event) {
+	title_field = $("#event-title-input");
+	description_field = $("#events-description-input");
 	start_date_field = $("#event-start-date");
 	end_date_field = $("#event-end-date");
 
+	console.log(title_field);
+	console.log(description_field);
 	console.log(start_date_field);
 	console.log(end_date_field);
 
-	start_date_field.html(startDate);
-	end_date_field.html(endDate);
+	console.log(event.title);
+	console.log(event.description);
+	console.log(event.start.format());
+	console.log(event.end.format());
+
+	title_field.val(event.title);
+	description_field.val(event.description);
+	start_date_field.html(event.start.format());
+	end_date_field.html(event.end.format());
+
+	$("#event-delete-button").off("click");
+
+	$("#event-delete-button").click(function() {
+		console.log('PRESSED DELETEXXXXXXXXXXXXXXXXXXXXXXXXXXX');
+		delete_event(event);
+	});
+
+	if(event.title != undefined) {
+		console.log('CLICKED EVENT TO UPDATE');
+		$("#event-create-button-text").html('Update');
+
+		$("#event-create-button").off('click');
+
+		$("#event-create-button").click(function() {
+			console.log('CLICKED UPDATE')
+			event_data = {
+				'id' : event.id,
+				'title' : title_field.val(),
+				'description' : description_field.val(),
+				'start_date' : start_date_field.html(),
+				'end_date' : end_date_field.html()
+			}
+
+			update_calendar_event(event_data);
+		})
+	} else {
+		$("#event-create-button-text").html('Create');
+
+		$("#event-create-button").off('click');
+
+		$("#event-create-button").click(function() {
+			if(verify_event_inputs() === true) {
+				create_calendar_event();
+			}
+		})
+	}
 
 	$("#family-event-create-wrapper").css('display','flex');
 }
 
-$("#event-create-button").click(function() {
-	create_calendar_event();
-})
+function verify_event_inputs() {
+	title_field = $("#event-title-input");
+	description_field = $("#events-description-input");
+
+	title = title_field.val();
+	description = description_field.val();
+
+	console.log('verify');
+	console.log(title + '  ' + description);
+
+	if(title === '') {
+		alert('Please insert a title to your new event.');
+		return false;
+	} else {
+		if (description === '') {
+			alert('Please insert a description for your new event.');
+			return false
+		} else {
+			return true
+		}
+
+	}
+}
 
 function create_calendar_event() {
 	console.log('entered create_event');
@@ -1115,7 +1187,8 @@ function create_calendar_event() {
 		success: function(data) {
 			data = JSON.parse(data);
 			if(data['status'] === 'success') {
-				// setTimeout(load_family_droplist,1000);
+				setTimeout(query_events,1000);
+				$("#family-event-create-wrapper").hide();
 			}
 		}
 	});
@@ -1127,6 +1200,8 @@ function query_events() {
 
 	console.log('CURRENT FAMILY = ========123123=======')
 	console.log(current_family);
+
+	events = []
 
 	$.ajax({
 		url: '/query_events/',
@@ -1142,9 +1217,12 @@ function query_events() {
 			console.log(events);
 
 			load_calendar_events(events['events']);
+
+			console.log('returning events');
+			console.log(events['events']);
+		return events['events'];
 		}
 	});
-
 }
 
 function load_calendar_events(events) {
@@ -1153,16 +1231,42 @@ function load_calendar_events(events) {
 
 	$("#calendar").fullCalendar('removeEvents');
 
-	// $('#calendar').fullCalendar('updateEvents', events);
+	setTimeout(function() {
+			$('#calendar').fullCalendar('addEventSource', events);
+	}, 500);
 
-	for(var i = 0; i< events.length; i++) {
-		console.log('I '+i);
-		$('#calendar').fullCalendar('renderEvent', {
-	              title: events[i]['title'],
-	              start: events[i]['start'],
-								end: events[i]['end']
-	            });
-	}
+}
+
+function delete_event(event) {
+
+	data = {
+		'id' : event.id
+	};
+
+	$.ajax({
+		url : '/delete_event/',
+		method : 'POST',
+		data: JSON.stringify(data),
+		success: function(data) {
+			data = JSON.parse(data);
+			$("#family-event-create-wrapper").hide();
+			query_events();
+		}
+	});
+}
+
+function update_calendar_event(event_data) {
+
+	$.ajax({
+		url : '/update_event/',
+		method : 'POST',
+		data: JSON.stringify(event_data),
+		success: function(data) {
+			data = JSON.parse(data);
+			$("#family-event-create-wrapper").hide();
+			query_events();
+		}
+	});
 }
 
 // ---------------------------- BUTTON EVENTS

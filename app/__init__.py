@@ -2,6 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from sqlalchemy import MetaData
+from flask_socketio import SocketIO
 import os
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -22,6 +23,10 @@ db = SQLAlchemy(app, metadata=MetaData(naming_convention={
     'ck': 'ck_%(table_name)s_%(constraint_name)s',
 }))
 migrate = Migrate(app, db)
+
+socketio = SocketIO(app)
+
+socketio.run(app)
 
 from app.models import User, Family
 

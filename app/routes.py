@@ -1,10 +1,18 @@
-from app import app
-from app import db
-from flask import render_template,request, session, redirect, url_for
-from app.models import User, Family, Join_Request, family_identifier, Reminder, List, Event
+from flask import Flask, render_template,request, session, redirect, url_for
 from functools import wraps
+import flask_socketio
 import json
 import datetime
+from app import app
+from app import db
+from app import socketio
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from sqlalchemy import MetaData
+from flask_socketio import SocketIO
+from flask_socketio import join_room, leave_room, send, emit
+import os
+from app.models import User,Family,Join_Request,Reminder,List,Event
 
 
 def logged_in(f):
@@ -618,9 +626,11 @@ def post_events():
 
 		user = User.query.filter_by(username=session['username']).first()
 		family_id = get_current_family()
+		family = Family.query.filter_by(id=family_id).first()
 
 		event = Event(family_id=family_id,title=event_title,start=start_date,end=end_date,description=event_description)
 
+		family.events.append(event)
 		db.session.add(event)
 		db.session.commit()
 
@@ -640,7 +650,9 @@ def query_events():
 		family = Family.query.filter_by(id=family_id).first()
 
 		events = family.events
-		print('query_events family.events: {}'.format(family.events))
+		print('query_events family.events: ')
+		for event in family.events:
+			print('id: {} title: {}'.format(event.id,event.title))
 
 		events_list = []
 
@@ -658,7 +670,110 @@ def query_events():
 		print('query_events ERROR: {}'.format(e))
 		return json.dumps({'status':'failure'})
 
+@app.route('/delete_event/',methods=['POST'])
+def delete_events():
+	try:
+		JSONstring = json.dumps(request.get_json(force=True))
+		data = json.loads(JSONstring)
+
+		id = data['id']
+
+		# event = List.query.filter_by(id=id).first()
+
+		family_id = get_current_family()
+		family = Family.query.filter_by(id=family_id).first()
+
+		events = family.events
+		print('delete_event family.events: ')
+		for event in family.events:
+			print('id: {} title: {}'.format(event.id,event.title))
+
+		print('ID: {}'.format(int(id)))
+
+		event = Event.query.filter(Event.family_id == family_id).filter(Event.id == int(id)).first()
+
+		print('delete_events Event:')
+		print(event)
+
+		db.session.delete(event)
+		db.session.commit()
+
+		print('got here3')
+
+		return json.dumps({'status':'success'})
+
+	except Exception as e:
+		print('delete_events ERROR: {}'.format(e))
+		return json.dumps({'status':'failure'})
+
+@app.route('/update_event/', methods=['POST'])
+def update_event():
+	try:
+		JSONstring = json.dumps(request.get_json(force=True))
+		data = json.loads(JSONstring)
+
+		id = int(data['id'])
+		title = str(data['title'])
+		description = data['description']
+		start_date = data['start_date']
+		end_date = data['end_date']
+
+		print('{} {}'.format(type(id),id))
+		print('{} {}'.format(type(title),title))
+		print('{} {}'.format(type(description),description))
+		print('{} {}'.format(type(start_date),start_date))
+		print('{} {}'.format(type(end_date),end_date))
+
+		user = User.query.filter_by(username=session['username']).first()
+		family_id = get_current_family()
+		family = Family.query.filter_by(id=family_id).first()
+
+		event = Event.query.filter(Event.family_id == family_id).filter(Event.id == id).first()
+		event.title = title
+		event.description = description
+		event.start = start_date
+		event.end = end_date
+
+		print('update_event Event:')
+		print(event)
+
+		db.session.add(event)
+		db.session.commit()
+
+		print('got here3')
+
+		return json.dumps({'status':'success'})
+
+	except Exception as e:
+		print('update_event ERROR: {}'.format(e))
+		return json.dumps({'status':'failure'})
+
 def get_current_family():
 	user = User.query.filter_by(username=session['username']).first()
 	print('get_current_family RESULT: {}'.format(user.current_family))
 	return user.current_family
+
+# ======================== SOCKETIO
+
+@socketio.on('message')
+def handle_message(message):
+	print('socket io message')
+	print(message)
+
+@socketio.on('join')
+def on_join(data):
+    username = data['username']
+    room = data['room']
+    join_room(room)
+    send(username + ' has entered the room.', room=room)
+
+@socketio.on('leave')
+def on_leave(data):
+    username = data['username']
+    room = data['room']
+    leave_room(room)
+    send(username + ' left the room.', room=room)
+
+@socketio.on('askformessage')
+def askformessage(data):
+	emit('chat message', json.dumps({'message':'TEST MESSAGE'}), room='testroom')
