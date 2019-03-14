@@ -7,14 +7,12 @@ console.log(document.domain + ':' + location.port);
 
 jQuery(document).ready(function(){
 
+	$("#side-menu-header").html(username);
+
 	var socket = io.connect('http://' + document.domain + ':' + location.port);
+
 	socket.on('connect', function() {
 	    socket.emit('message', {data: 'I\'m connected!'});
-	});
-
-	$("#footer").click(function() {
-		console.log('clicked footer');
-    socket.emit('join', {room: 'testroom', username: username});
 	});
 
 	$("#side-menu-header").click(function() {
@@ -23,12 +21,14 @@ jQuery(document).ready(function(){
 	});
 
 	$("#header").click(function() {
-		console.log('clicked header');
-		socket.emit('askformessage', {});
+		console.log('USER:' +username)
+		socket.emit('chat_message', {message: "it's working: from "+username});
 	});
 
-  socket.on('chat message', function(msg){
-    console.log('MESSAGE: ' + msg);
+  socket.on('joined_room', function(msg){
+	msg = JSON.parse(msg);
+	room_username = msg['username'];
+	console.log(room_username+' joined the room!');
   });
 
 
@@ -624,7 +624,20 @@ function load_family_droplist() {
 				if(families.length === 1) {
 					console.log('ADASDASDASS');
 					console.log(families);
-					set_current_family(families[0].name);
+					
+					data = {
+						'family_name' : families[0].name,
+						'username' : '{{ username }}'
+					}
+					$.ajax({
+						url: '/set_current_family/',
+						method: 'POST',
+						data: JSON.stringify(data),
+						success: function(data) {
+							data = JSON.parse(data);
+							current_family = name;
+						}
+					});
 
 				}
 
@@ -645,7 +658,6 @@ function set_current_family(name) {
 		'family_name' : name,
 		'username' : '{{ username }}'
 	}
-
 	$.ajax({
 		url: '/set_current_family/',
 		method: 'POST',
@@ -656,6 +668,12 @@ function set_current_family(name) {
 			location.reload(0);
 		}
 	});
+}
+
+function join_family_chat() {
+	console.log('[SOCKETIO] Trying to join family chat.')
+	var socket = io.connect('http://' + document.domain + ':' + location.port);
+	socket.emit('join_family_chat', {});
 }
 
 function get_current_family() {
@@ -677,6 +695,8 @@ function get_current_family() {
 			}
 		}
 	});
+
+	join_family_chat();
 }
 
 function return_current_family() {

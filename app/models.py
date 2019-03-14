@@ -24,10 +24,11 @@ class Family(db.Model):
 	country = db.Column(db.String(50))
 	location = db.Column(db.String(100))
 	members = db.relationship('User',secondary=family_identifier)
-	join_requests = db.relationship('Join_Request', backref='family', lazy=True)
+	join_requests = db.relationship('Join_Request', backref='family_request', lazy=True)
 	reminders = db.relationship('Reminder', backref='family_reminder', lazy=True)
 	lists = db.relationship('List', backref='family_list', lazy=True)
 	events = db.relationship('Event', backref='family_events', lazy=True)
+	chat = db.relationship('Chat', backref='family_chat', lazy=True)
 
 class Join_Request(db.Model):
 	id = db.Column(db.Integer, primary_key = True)
@@ -52,9 +53,21 @@ class List(db.Model):
 
 class Event(db.Model):
 	id = db.Column(db.Integer, primary_key = True)
-	user = db.Column(db.String(100), )
 	title = db.Column(db.String(100), nullable=False)
 	description = db.Column(db.String(300), nullable=True)
 	start = db.Column(db.String(100), nullable=False)
 	end = db.Column(db.String(100), nullable=False)
 	family_id = db.Column(db.Integer, db.ForeignKey('family.id'))
+
+class Chat(db.Model):
+	id = db.Column(db.Integer, primary_key = True)
+	family_id = db.Column(db.Integer, db.ForeignKey('family.id'))
+	room_id = db.Column(db.String(10))
+	chat_messages = db.relationship('ChatMessage', backref='chat_messages', lazy=True)
+
+class ChatMessage(db.Model):
+	id = db.Column(db.Integer, primary_key = True)
+	chat_id = db.Column(db.Integer, db.ForeignKey('chat.id'))
+	timestamp = db.Column(db.String(100), nullable=False)
+	content = db.Column(db.String(400), nullable=False)
+	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))

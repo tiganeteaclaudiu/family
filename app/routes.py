@@ -12,7 +12,8 @@ from sqlalchemy import MetaData
 from flask_socketio import SocketIO
 from flask_socketio import join_room, leave_room, send, emit
 import os
-from app.models import User,Family,Join_Request,Reminder,List,Event
+from app.models import User,Family,Join_Request,Reminder,List,Event,Chat,ChatMessage
+from random import randint
 
 
 def logged_in(f):
@@ -32,6 +33,7 @@ def logged_in(f):
 @app.route('/index/')
 @logged_in
 def index():
+
 	no_family = check_no_family(session['username'])
 	return render_template('index.html',username = session['username'],no_family = no_family)
 
@@ -124,8 +126,20 @@ def post_family():
 		location = data['location_data']
 		phrase = data['phrase']
 
+		new_room_id = generate_chat_room_id()
+		print('new chat id: {}'.format(new_room_id))
+
 		new_family = Family(name=name,country=country,location=location)
+
 		db.session.add(new_family)
+
+		db.session.flush()
+
+		print('new family id: {}'.format(new_family.id))
+
+		new_chat_room = Chat(family_id = new_family.id, room_id = new_room_id)
+
+		db.session.add(new_chat_room)
 		db.session.commit()
 
 		print ('post_family added family:\n')
@@ -142,6 +156,33 @@ def post_family():
 		return json.dumps({
 			'status' : 'failure'
 			})
+
+#generate random 10 digit numbers to use in Chat.room_id field
+#checks if room_id already exists
+def generate_chat_room_id():
+	try:
+		rooms = Chat.query.order_by(Chat.room_id).all()
+		print('#generate_chat_room_id room_id:')
+		for room in rooms:
+			print(room.room_id)
+
+		random_id = ''
+
+		while True:
+			random_id = randint(1000000000,9999999999)
+			ok = True
+			for room in rooms:
+				if random_id == room.room_id:
+					ok = False
+				else:
+					print('GENERATED: {}'.format(random_id))
+			if ok:
+				break
+
+		return random_id
+
+	except Exception as e:
+		print('#generate_chat_room_id ERROR: {}'.format(e))
 
 
 @app.route('/add_family_member/',methods=['POST'])
@@ -182,6 +223,7 @@ def add_family_member():
 @app.route('/check_no_family/',methods=['POST'])
 def check_no_family(username):
 	try:
+
 		user = User.query.filter_by(username=username).first()
 		families = user.families
 
@@ -325,29 +367,24 @@ def query_join_requests():
 @app.route('/accept_join_request/',methods=['POST'])
 def accept_join_request():
 
-	get_current_family()
-
 	JSONstring = json.dumps(request.get_json(force=True))
 	data = json.loads(JSONstring)
-
 	data['family'] = data['family']
-
 	family = Family.query.filter_by(name=data['family']).first()
-
+	print('accept_join_request family: {}'.format(family.name))
 	requester = User.query.filter_by(id=data['id']).first()
-
 	join_request = Join_Request.query.filter(Join_Request.requester_id == data['id']).filter(Join_Request.family_id == family.id).first()
-
+	family_join_requests = family.join_requests
+	print('accept_join_request JOIN_REQUST: {}'.format(join_request))
+	#delete request from database
+	db.session.flush()
 	db.session.delete(join_request)
-
-	family.members.append(requester)
-
-	db.session.add(family)
-
 	db.session.commit()
-
+	#add requester to family members
+	family.members.append(requester)
+	db.session.add(family)
+	db.session.commit()
 	print('accept_join_request join_request: {}'.format(join_request))
-
 	return ''
 
 @app.route('/leave_family/',methods=['POST'])
@@ -404,11 +441,19 @@ def set_current_family():
 		db.session.commit()
 
 		print('set_current_family current_family AFTER: {}'.format(user.current_family))
+
+		join_chat_room(family.chat)
+
+		# leave_room(room)
+		# send(username + ' left the room.', room=room)
+
+		
 		return json.dumps({'status' : 'success'})
 
 	except Exception as e:
 		print('set_current_family ERROR: {}'.format(e))
 		return json.dumps({'status' : 'failure'})
+
 
 @app.route('/get_current_family/',methods=['POST'])
 def get_current_family():
@@ -475,6 +520,9 @@ def query_reminders():
 
 		family_name = data['family_name']
 		family = Family.query.filter_by(name=family_name).first()
+
+		print('sending message to family room:')
+		emit('chat message', json.dumps({'message':'TEST MESSAGE'}), room=family.chat)
 
 		reminders = family.reminders
 		print('query_reminders family.reminders: {}'.format(family.reminders))
@@ -624,15 +672,22 @@ def post_events():
 		event_title = data['event_title']
 		event_description = data['event_description']
 
-		user = User.query.filter_by(username=session['username']).first()
+		print('here1')
+
 		family_id = get_current_family()
 		family = Family.query.filter_by(id=family_id).first()
 
+		print('here2')
+
 		event = Event(family_id=family_id,title=event_title,start=start_date,end=end_date,description=event_description)
+
+		print('here3')
 
 		family.events.append(event)
 		db.session.add(event)
 		db.session.commit()
+
+		print('here4')
 
 		return json.dumps({'status':'success'})
 
@@ -753,7 +808,61 @@ def get_current_family():
 	print('get_current_family RESULT: {}'.format(user.current_family))
 	return user.current_family
 
+def get_current_family_chatroom():
+	current_family_id = get_current_family()
+	family = Family.query.filter_by(id=current_family_id).first()
+
+	chat_room_id = family.chat[0].room_id
+
+	return chat_room_id
+
+# ======================== CHAT ROOMS
+#
+@app.route('/post_chats/',methods=['POST'])
+def post_chats():
+	try:
+		JSONstring = json.dumps(request.get_json(force=True))
+		data = json.loads(JSONstring)
+
+		start_date = data['start_date']
+		end_date = data['end_date']
+		chat_title = data['chat_title']
+		chat_description = data['chat_description']
+
+		print('here1')
+
+		family_id = get_current_family()
+		family = Family.query.filter_by(id=family_id).first()
+
+		print('here2')
+
+		event = Event(family_id=family_id,title=event_title,start=start_date,end=end_date,description=event_description)
+
+		print('here3')
+
+		family.events.append(event)
+		db.session.add(event)
+		db.session.commit()
+
+		print('here4')
+
+		return json.dumps({'status':'success'})
+
+	except Exception as e:
+		print('post_lists ERROR: {}'.format(e))
+		return json.dumps({'status' : 'failure' })
+
 # ======================== SOCKETIO
+
+@socketio.on('join_family_chat')
+def join_chat_room(data):
+	chat_room_id = get_current_family_chatroom()
+
+	print('current family chat room id: {}'.format(chat_room_id))
+
+	join_room(chat_room_id)
+	emit(session['username'] + ' has entered the room.', room=chat_room_id)
+	emit('joined_room', json.dumps({'username':session['username']}), room=chat_room_id)
 
 @socketio.on('message')
 def handle_message(message):
@@ -762,18 +871,23 @@ def handle_message(message):
 
 @socketio.on('join')
 def on_join(data):
-    username = data['username']
-    room = data['room']
-    join_room(room)
-    send(username + ' has entered the room.', room=room)
+	username = data['username']
+	room = data['room']
+	join_room(room)
+	send(username + ' has entered the room.', room=room)
 
 @socketio.on('leave')
 def on_leave(data):
-    username = data['username']
-    room = data['room']
-    leave_room(room)
-    send(username + ' left the room.', room=room)
+	username = data['username']
+	room = data['room']
+	leave_room(room)
+	send(username + ' left the room.', room=room)
 
 @socketio.on('askformessage')
 def askformessage(data):
 	emit('chat message', json.dumps({'message':'TEST MESSAGE'}), room='testroom')
+
+@socketio.on('chat_message')
+def chat_message(data):
+	print('[SOCKETIO] Chat message: {}'.format(data['message']))
+	emit('chat message', json.dumps({'message':'TEST MESSAGE'}), room=get_current_family_chatroom)
