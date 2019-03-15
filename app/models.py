@@ -70,4 +70,4 @@ class ChatMessage(db.Model):
 	chat_id = db.Column(db.Integer, db.ForeignKey('chat.id'))
 	timestamp = db.Column(db.String(100), nullable=False)
 	content = db.Column(db.String(400), nullable=False)
-	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+	username = db.Column(db.String(30), nullable=False)

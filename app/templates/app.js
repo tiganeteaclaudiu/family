@@ -11,26 +11,6 @@ jQuery(document).ready(function(){
 
 	var socket = io.connect('http://' + document.domain + ':' + location.port);
 
-	socket.on('connect', function() {
-	    socket.emit('message', {data: 'I\'m connected!'});
-	});
-
-	$("#side-menu-header").click(function() {
-		console.log('clicked logo');
-    socket.emit('leave', {room: 'testroom', username: username});
-	});
-
-	$("#header").click(function() {
-		console.log('USER:' +username)
-		socket.emit('chat_message', {message: "it's working: from "+username});
-	});
-
-  socket.on('joined_room', function(msg){
-	msg = JSON.parse(msg);
-	room_username = msg['username'];
-	console.log(room_username+' joined the room!');
-  });
-
 
 current_family = '';
 
@@ -124,6 +104,17 @@ menu_options = {
 					}
 				}
 			]
+	},
+	'family-chat' : {
+		'family-chat-main-panel' : [
+			{
+				'name' : 'Family Chat',
+				'link' : 'family-chat',
+				funct : function() {
+					query_chat_messages();
+				}
+			}
+		]
 	}
 }
 
@@ -668,12 +659,6 @@ function set_current_family(name) {
 			location.reload(0);
 		}
 	});
-}
-
-function join_family_chat() {
-	console.log('[SOCKETIO] Trying to join family chat.')
-	var socket = io.connect('http://' + document.domain + ':' + location.port);
-	socket.emit('join_family_chat', {});
 }
 
 function get_current_family() {
@@ -1288,6 +1273,107 @@ function update_calendar_event(event_data) {
 		}
 	});
 }
+
+//--------------- SOCKETIO
+
+function join_family_chat() {
+	console.log('[SOCKETIO] Trying to join family chat.')
+	var socket = io.connect('http://' + document.domain + ':' + location.port);
+	socket.emit('join_family_chat', {});
+}
+
+function add_chat_message(body, sender, timestamp){
+	container = $("#family-chat-container");
+	received = true;
+
+	if (sender === username){
+		received = false;
+	} else {
+		received = true;
+	}
+
+	//change class depending on message sender (sent or received)
+	if (received === true) {
+		new_message_html = '<div class="family-chat-message-row-received">';
+		new_message_html += '<p class="family-chat-message-sender">'+sender+':</p>';
+		new_message_html += "<p class='family-chat-message-body'>"+body+"</p>";
+	} else {
+		new_message_html =  '<div class="family-chat-message-row-sent">';
+		new_message_html += '<p class="family-chat-message-sender">You:</p>';
+		new_message_html += "<p class='family-chat-message-body'>"+body+"</p>";
+	}
+
+	new_message_html += '</div>';
+
+	new_message_element = $(new_message_html);
+	console.log('[CHAT] adding element html:');
+	console.log(new_message_html);
+	container.append(new_message_element);
+
+	console.log('[CHAT] adding element element:');
+	console.log(new_message_element);
+}
+
+$("#family-chat-input-send").click(function() {
+	console.log('CLICKED FAMILY CHAT INPUT SEND');
+	family_chat_send_message();
+});
+
+function family_chat_send_message() {
+	body = $("#family-chat-input").val();
+	sender = username;
+	timestamp = new Date();
+
+	console.log('[CHAT] Sending message:')
+	console.log('body: '+body);
+	console.log('sender: '+sender);
+	console.log('timestamp: '+timestamp);
+
+	socket.emit('chat_message', {body: body, sender: sender, timestamp: timestamp});
+}
+
+socket.on('connect', function() {
+	socket.emit('message', {data: 'I\'m connected!'});
+});
+
+socket.on('joined_room', function(msg){
+msg = JSON.parse(msg);
+room_username = msg['username'];
+console.log(room_username+' joined the room!');
+});
+
+socket.on('chat_message', function(msg){
+	msg = JSON.parse(msg);
+
+	body = msg['body'];
+	sender = msg['sender'];
+	timestamp = msg['timestamp'];
+
+	console.log('[CHAT] Message:');
+	console.log('sender: '+sender);
+	console.log('body: '+body);
+	console.log('timestamp: '+timestamp);
+
+	add_chat_message(body,sender,timestamp);
+});
+
+
+function query_chat_messages() {
+
+	$.ajax({
+		url: '/query_chat_messages/',
+		method: 'POST',
+		data: '',
+		success: function(data) {
+			data=JSON.parse(data);
+			messages = JSON.parse(data['messages']);
+			console.log('query chat data;');
+			console.log(messages);
+		}
+	});
+
+}
+
 
 // ---------------------------- BUTTON EVENTS
 $("#content-back-button").click(function(e) {

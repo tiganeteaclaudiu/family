@@ -33,7 +33,6 @@ def logged_in(f):
 @app.route('/index/')
 @logged_in
 def index():
-
 	no_family = check_no_family(session['username'])
 	return render_template('index.html',username = session['username'],no_family = no_family)
 
@@ -521,9 +520,6 @@ def query_reminders():
 		family_name = data['family_name']
 		family = Family.query.filter_by(name=family_name).first()
 
-		print('sending message to family room:')
-		emit('chat message', json.dumps({'message':'TEST MESSAGE'}), room=family.chat)
-
 		reminders = family.reminders
 		print('query_reminders family.reminders: {}'.format(family.reminders))
 
@@ -808,13 +804,24 @@ def get_current_family():
 	print('get_current_family RESULT: {}'.format(user.current_family))
 	return user.current_family
 
-def get_current_family_chatroom():
-	current_family_id = get_current_family()
-	family = Family.query.filter_by(id=current_family_id).first()
+def get_current_family_object():
+	family_id = get_current_family()
 
-	chat_room_id = family.chat[0].room_id
+	family = Family.query.filter_by(id=family_id).first()
+	print('get_current_family_object family: {}'.format(family))
+
+	return family
+
+def get_current_family_chatroom():
+	chat_room_id = get_current_family_chat_object().room_id
 
 	return chat_room_id
+
+def get_current_family_chat_object():
+	current_family = get_current_family_object()
+	chat_room = current_family.chat[0]
+
+	return chat_room
 
 # ======================== CHAT ROOMS
 #
@@ -889,5 +896,68 @@ def askformessage(data):
 
 @socketio.on('chat_message')
 def chat_message(data):
-	print('[SOCKETIO] Chat message: {}'.format(data['message']))
-	emit('chat message', json.dumps({'message':'TEST MESSAGE'}), room=get_current_family_chatroom)
+	print('[SOCKETIO] Chat message: \nfrom: {}\nbody: {}\ntimestamp: {}'.format(data['sender'],data['body'],data['timestamp']))
+
+	sender = data['sender']
+	body = data['body']
+	timestamp = data['timestamp']
+
+	family = get_current_family_object()
+
+	chat_room = family.chat[0]
+	chat_room_id = family.chat[0].id
+
+	print('chat_message chat_room: {}'.format(chat_room_id))
+
+	chat_message = ChatMessage(chat_id=chat_room_id, timestamp=timestamp,content=body,username=sender)
+	db.session.add(chat_message)
+
+	db.session.commit()
+
+	print('[CHAT] chat_message added message:')
+	print(chat_message)
+
+	print('family messages:')
+	print(chat_room.chat_messages)
+
+	json_dict = {
+		'body' : body,
+		'timestamp' : timestamp,
+		'sender' : sender
+	}
+
+	# user = User.query.filter_by(username=username).first()
+
+	emit('chat_message', json.dumps(json_dict),
+		 room=get_current_family_chatroom())
+	
+@app.route('/query_chat_messages/',methods=['POST'])
+def query_chat_messages():
+	try:
+		# JSONstring = json.dumps(request.get_json(force=True))
+		# data = json.loads(JSONstring)
+
+		chat_room = get_current_family_chat_object()
+		print('[CHAT] query_chat_messages chat_room: {}'.format(chat_room))
+
+		messages_list = []
+
+		chat_messages = chat_room.chat_messages
+		for message in chat_messages:
+			message_dict = {
+				'body' : message.content,
+				'timestamp' : message.timestamp,
+				'username' : message.username
+			}
+			messages_list.append(message_dict)
+
+		messages_dict = json.dumps({'messages' : messages_list})
+
+		print('query_chat_messages chat_messages JSON:')
+		print(json.dumps(messages_dict))
+
+		return json.dumps({'status':'success','messages':messages_dict})
+
+	except Exception as e:
+		print('query_chat_messages ERROR: {}'.format(e))
+		return json.dumps({'status':'failure'})
