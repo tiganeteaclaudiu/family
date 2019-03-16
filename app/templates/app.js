@@ -115,6 +115,17 @@ menu_options = {
 				}
 			}
 		]
+	},
+	'family-cloud' : {
+		'family-cloud-main-panel' : [
+			{
+				'name' : 'Family Cloud',
+				'link' : 'family-cloud',
+				funct : function() {
+					// query_latest_messages();
+				}
+			}
+		]
 	}
 }
 

@@ -141,6 +141,19 @@ def post_family():
 		db.session.add(new_chat_room)
 		db.session.commit()
 
+		#TODO: MOVE CLOUD VARIABLE TO CONFIGURATION
+		cloud_dir_name = os.path.join(os.getcwd(),'Cloud')
+		family_cloud_dir_name = name+'_'+str(new_family.id)
+
+		family_cloud_dir_path = os.path.join(cloud_dir_name,family_cloud_dir_name)
+
+		# new_cloud = Cloud(family_id = new_family.id, dir_path=family_cloud_dir_path)
+
+		print('post_family cloud_dir_name : {}'.format(cloud_dir_name))
+		print('post_family family_cloud_dir_name : {}'.format(family_cloud_dir_name))
+
+		create_cloud_directory(parent_dir=cloud_dir_name,dir_name=family_cloud_dir_name)
+
 		print ('post_family added family:\n')
 		print ('name: {}'.format(name))
 		print ('country: {}'.format(country))
@@ -902,6 +915,9 @@ def chat_message(data):
 	body = data['body']
 	timestamp = data['timestamp']
 
+	if body == '':
+		return False
+
 	family = get_current_family_object()
 
 	chat_room = family.chat[0]
@@ -1006,3 +1022,10 @@ def query_chat_messages():
 	except Exception as e:
 		print('query_chat_messages ERROR: {}'.format(e))
 		return json.dumps({'status':'failure'})
+
+#-------------------------------------- CLOUD
+
+def create_cloud_directory(parent_dir=None, dir_name=None):
+	os.chdir(parent_dir)
+	print('create_cloud_dir navigated to {}'.format(os.getcwd()))
+	os.mkdir(dir_name)

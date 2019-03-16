@@ -29,6 +29,7 @@ class Family(db.Model):
 	lists = db.relationship('List', backref='family_list', lazy=True)
 	events = db.relationship('Event', backref='family_events', lazy=True)
 	chat = db.relationship('Chat', backref='family_chat', lazy=True)
+	cloud = db.relationship('Cloud', backref='family_cloud', lazy=True)
 
 class Join_Request(db.Model):
 	id = db.Column(db.Integer, primary_key = True)
@@ -71,3 +72,18 @@ class ChatMessage(db.Model):
 	timestamp = db.Column(db.String(100), nullable=False)
 	content = db.Column(db.String(400), nullable=False)
 	username = db.Column(db.String(30), nullable=False)
+
+class Cloud(db.Model):
+	id = db.Column(db.Integer, primary_key = True)
+	family_id = db.Column(db.Integer, db.ForeignKey('family.id'))
+	dir_path = db.Column(db.String(200), nullable=False)
+	files = db.relationship('File', backref='cloud_files', lazy=True)
+
+class File(db.Model):
+	id = db.Column(db.Integer, primary_key = True)
+	cloud_id = db.Column(db.Integer, db.ForeignKey('cloud.id'))
+	filename = db.Column(db.String(200), nullable=False)
+	extension = db.Column(db.String(20), nullable=False)
+	size = db.Column(db.Integer, nullable=False)
+	username = db.Column(db.String(30), nullable=False)
+	timestamp = db.Column(db.String(100), nullable=False)
