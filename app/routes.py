@@ -934,27 +934,72 @@ def chat_message(data):
 @app.route('/query_chat_messages/',methods=['POST'])
 def query_chat_messages():
 	try:
-		# JSONstring = json.dumps(request.get_json(force=True))
-		# data = json.loads(JSONstring)
+		JSONstring = json.dumps(request.get_json(force=True))
+		data = json.loads(JSONstring)
+
+		get_latest = False
+		start_id = ''
+
+		#check if id of last message is sent via request
+		try:
+			start_id = int(data['start_id'])-5;
+			end_id = start_id + 5
+		except Exception as e:
+			print('[CHAT] No start and end id found.')
+			get_latest = True
 
 		chat_room = get_current_family_chat_object()
 		print('[CHAT] query_chat_messages chat_room: {}'.format(chat_room))
 
 		messages_list = []
 
-		chat_messages = chat_room.chat_messages
+		chat_messages = ChatMessage.query.filter(ChatMessage.chat_id == chat_room.id).order_by(ChatMessage.id.desc()).limit(16).all()
+		filtered_chat_messages = []
+
+		family_chat_messages = chat_room.chat_messages
+		family_chat_filtered_messages = []
+
+		print('[CHAT] Family chat messages:')
+		print(family_chat_messages)
+
+		if not get_latest:
+
+			print('[CHAT] query_chat_messages getting messages between: {} and {}'.format(start_id,end_id))
+
+			for message in family_chat_messages:
+				if message.id > start_id and message.id < end_id:
+					family_chat_filtered_messages.append(message)
+
+			print('[CHAT] Family filtered messages: ')
+			print(family_chat_filtered_messages)
+
+			chat_messages = list(family_chat_filtered_messages)
+
+		print('query_chat_messages all messages:')
+		# limited_chat_messages = chat_room.chat_messages.filter_by(id)
+		# print('query_chat_messages all messages:')
+
+		chat_messages.reverse()
+
 		for message in chat_messages:
 			message_dict = {
+				'id' : message.id,
 				'body' : message.content,
 				'timestamp' : message.timestamp,
 				'username' : message.username
 			}
 			messages_list.append(message_dict)
 
-		messages_dict = json.dumps({'messages' : messages_list})
+		#debug printing:
+		print('[CHAT] ALL MESSAGES:')
+		for message in messages_list:
+			print('----------------------')
+			print('id : {}'.format(message['id']))
+			print('body : {}'.format(message['body']))
+			print('timestamp : {}'.format(message['timestamp']))
+			print('username : {}'.format(message['username']))
 
-		print('query_chat_messages chat_messages JSON:')
-		print(json.dumps(messages_dict))
+		messages_dict = json.dumps({'messages' : messages_list})
 
 		return json.dumps({'status':'success','messages':messages_dict})
 

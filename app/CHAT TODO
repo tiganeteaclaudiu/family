@@ -1,0 +1,11 @@
+Sequence for realtime chat:
+
+    - when user logs in, 30 messages are queried - DONE
+    - each time a message is sent via socket, it can be loaded 2 ways:
+        - a each-every-5-seconds polling query is done to check that all the latest messages are loaded
+        - the message is received via socket to other users in the room
+
+        Things to try:
+            - see if it's possible to get a 'message received' response when the user receives a message via socket
+                -this would mean emitting the message to the room via a thread, while another timeout thread checks if a response is received
+                

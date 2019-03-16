@@ -15,7 +15,8 @@
 
         <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.3.1.js') }}"></script>
 
-        <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.js') }}"></script>
+		<script type='text/javascript' src='{{ url_for("static", filename="js/popper.js") }}'></script>
+		<script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.js') }}"></script>
 
         <script type='text/javascript' src='{{ url_for("static", filename="js/moment.js") }}'></script>
 
@@ -367,17 +368,20 @@
 		</div>
 
 		<div class="content-2col" id="content_family-chat" style="display: none;">
-			<div class="content-2col-col">
+			<div class="content-2col-col" style='width:80%'>
 				<h5 id="join-family-header" style="align-self: flex-start;">Family Chat</h5>
-			
+		
 				<div id='family-chat-container'>
+						<div id='family-chat-loading'>Loading..</p></div>
 					<div id='family-chat-input-container'>
 						<input type="text" id='family-chat-input'>
 						<div id='family-chat-input-send'>
 							<span class="icon icon-send" aria-hidden="true" style='padding-bottom: 7px;'></span>
 						</div>
 					</div>
+					<div id='family-chat-messages-container'></div>
 				</div>
+			</div>
 				
 			</div>
 		</div>

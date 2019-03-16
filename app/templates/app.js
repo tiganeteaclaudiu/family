@@ -111,7 +111,7 @@ menu_options = {
 				'name' : 'Family Chat',
 				'link' : 'family-chat',
 				funct : function() {
-					query_chat_messages();
+					query_latest_messages();
 				}
 			}
 		]
@@ -1282,8 +1282,9 @@ function join_family_chat() {
 	socket.emit('join_family_chat', {});
 }
 
-function add_chat_message(body, sender, timestamp){
-	container = $("#family-chat-container");
+function add_chat_message(toBeginning, id, body, sender, timestamp){
+
+	container = $("#family-chat-messages-container");
 	received = true;
 
 	if (sender === username){
@@ -1294,13 +1295,13 @@ function add_chat_message(body, sender, timestamp){
 
 	//change class depending on message sender (sent or received)
 	if (received === true) {
-		new_message_html = '<div class="family-chat-message-row-received">';
+		new_message_html = '<div class="family-chat-message-row-received" data-toggle="tooltip" title="'+timestamp+'" id="'+id+'">';
 		new_message_html += '<p class="family-chat-message-sender">'+sender+':</p>';
-		new_message_html += "<p class='family-chat-message-body'>"+body+"</p>";
+		new_message_html += "<div class='message-body-container'><p class='family-chat-message-body'>"+body+"</p></div>";
 	} else {
-		new_message_html =  '<div class="family-chat-message-row-sent">';
+		new_message_html =  '<div class="family-chat-message-row-sent" data-toggle="tooltip" title="'+timestamp+'" id='+id+'>';
 		new_message_html += '<p class="family-chat-message-sender">You:</p>';
-		new_message_html += "<p class='family-chat-message-body'>"+body+"</p>";
+		new_message_html += "<div class='message-body-container'><p class='family-chat-message-body'>"+body+"</p></div>";
 	}
 
 	new_message_html += '</div>';
@@ -1308,10 +1309,21 @@ function add_chat_message(body, sender, timestamp){
 	new_message_element = $(new_message_html);
 	console.log('[CHAT] adding element html:');
 	console.log(new_message_html);
-	container.append(new_message_element);
+
+	if(toBeginning === false) {
+		container.append(new_message_element);
+		//scroll to bottom of container
+		var scr = container[0].scrollHeight;
+		container.scrollTop(scr);
+	} else {
+		container.prepend(new_message_element);
+	}
 
 	console.log('[CHAT] adding element element:');
 	console.log(new_message_element);
+
+	$('[data-toggle="tooltip"]').tooltip(); 
+
 }
 
 $("#family-chat-input-send").click(function() {
@@ -1329,6 +1341,8 @@ function family_chat_send_message() {
 	console.log('sender: '+sender);
 	console.log('timestamp: '+timestamp);
 
+	$("#family-chat-input").val('');
+
 	socket.emit('chat_message', {body: body, sender: sender, timestamp: timestamp});
 }
 
@@ -1345,30 +1359,77 @@ console.log(room_username+' joined the room!');
 socket.on('chat_message', function(msg){
 	msg = JSON.parse(msg);
 
+	id = msg['id'];
 	body = msg['body'];
 	sender = msg['sender'];
 	timestamp = msg['timestamp'];
 
 	console.log('[CHAT] Message:');
+	console.log('id:' + id);
 	console.log('sender: '+sender);
 	console.log('body: '+body);
 	console.log('timestamp: '+timestamp);
 
-	add_chat_message(body,sender,timestamp);
+	add_chat_message(false,id,body,sender,timestamp);
 });
 
 
-function query_chat_messages() {
+function query_chat_messages(start_id) {
+
+	$("#family-chat-loading").show();
 
 	$.ajax({
 		url: '/query_chat_messages/',
 		method: 'POST',
-		data: '',
+		data: JSON.stringify({'start_id' : start_id}),
 		success: function(data) {
 			data=JSON.parse(data);
-			messages = JSON.parse(data['messages']);
+			messages = JSON.parse(data['messages'])['messages'];
 			console.log('query chat data;');
 			console.log(messages);
+
+			$("#family-chat-loading").hide();
+
+			for(var i=0;i<messages.length;i++) {
+				console.log('MESSAGE: ');
+				console.log(messages[i]);
+				add_chat_message(true,messages[i]['id'],messages[i]['body'],messages[i]['username'],messages[i]['timestamp']);
+			}
+		}
+	});
+
+}
+
+$("#family-chat-messages-container").scroll(function(){
+    if($(this).scrollTop() === 0){
+		last_message_id = $("#family-chat-messages-container").children()[0].id;
+
+		query_chat_messages(last_message_id);
+
+    }
+});
+
+function query_latest_messages() {
+
+	$("#family-chat-loading").show();
+
+	$.ajax({
+		url: '/query_chat_messages/',
+		method: 'POST',
+		data: JSON.stringify({}),
+		success: function(data) {
+			data=JSON.parse(data);
+			messages = JSON.parse(data['messages'])['messages'];
+			console.log('query chat data;');
+			console.log(messages);
+
+			$("#family-chat-loading").hide();
+
+			for(var i=0;i<messages.length;i++) {
+				console.log('MESSAGE: ');
+				console.log(messages[i]);
+				add_chat_message(false,messages[i]['id'],messages[i]['body'],messages[i]['username'],messages[i]['timestamp']);
+			}
 		}
 	});
 
@@ -1467,5 +1528,14 @@ $("#event-input-close-button").click(function(e) {
 	$("#family-event-create-wrapper").hide();
 });
 
+// KEYBOARD EVENTS
+
+$('#family-chat-input').on('keypress', function (e) {
+	console.log('pressed key: '+e.which);
+	if(e.which === 13){
+		console.log('pressed enter');
+		family_chat_send_message();
+	}
+});
 
 });
