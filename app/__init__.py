@@ -12,15 +12,16 @@ class Config(object):
 	SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
 		'sqlite:///' + os.path.join(basedir, 'app.db')
 	SQLALCHEMY_TRACK_MODIFICATIONS = False
+	CLOUD_PATH = os.path.join(os.getcwd(),'Cloud')
 
 app = Flask(__name__)
 app.config.from_object(Config)
 db = SQLAlchemy(app, metadata=MetaData(naming_convention={
-    'pk': 'pk_%(table_name)s',
-    'fk': 'fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s',
-    'ix': 'ix_%(table_name)s_%(column_0_name)s',
-    'uq': 'uq_%(table_name)s_%(column_0_name)s',
-    'ck': 'ck_%(table_name)s_%(constraint_name)s',
+	'pk': 'pk_%(table_name)s',
+	'fk': 'fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s',
+	'ix': 'ix_%(table_name)s_%(column_0_name)s',
+	'uq': 'uq_%(table_name)s_%(column_0_name)s',
+	'ck': 'ck_%(table_name)s_%(constraint_name)s',
 }))
 migrate = Migrate(app, db)
 

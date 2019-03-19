@@ -773,8 +773,10 @@ body, html {
 }
 
 .family-cloud-file-container {
-	width: 7rem;
-	height: 7rem;
+	width: 9rem;
+	height: 9rem;
+	padding:8px;
+	overflow:hidden;
 	background-color:white;
 	margin: 25px;
 	border-radius: 7px;
@@ -782,12 +784,16 @@ body, html {
 	flex-direction: column;
 	align-items: center;
 	justify-content: space-evenly;
+	cursor:pointer;
 }
 
-.family-cloud-file-image-container {
+.family-cloud-file-extension-container {
 	width: 50%;
 	height: 50%;
-	border: 1px solid black;
+	border: none;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 
 .family-cloud-file-name-container {
@@ -813,4 +819,30 @@ body, html {
 	align-self: flex-end;
 	position: absolute;
 	right: 2%;
+}
+
+#family-cloud-open-input {
+	height: 70px;
+	background-color: red;
+	position: absolute;
+	right: 0;
+	top: -80px;
+	border-radius: 7px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	cursor: pointer;
+	padding:15px;
+	margin-top: 3%;
+	align-self: flex-end;
+	position: absolute;
+	right: 2%;
+}
+
+.cloud-filename-container {
+	width: 100%;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+	text-align: center;
 }

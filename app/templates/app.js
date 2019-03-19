@@ -122,7 +122,7 @@ menu_options = {
 				'name' : 'Family Cloud',
 				'link' : 'family-cloud',
 				funct : function() {
-					// query_latest_messages();
+					get_family_cloud_files();
 				}
 			}
 		]
@@ -1446,6 +1446,107 @@ function query_latest_messages() {
 
 }
 
+//------------------------------------ FAMILY CLOUD
+
+$('#family-cloud-add-button').click(function() {
+	var upload_data = new FormData();
+	upload_data.append('file', $('#family-file-input')[0].files[0]);
+	$.ajax({
+		type: 'POST',
+		url: '/upload_cloud_file/',
+		data: upload_data,
+		contentType: false,
+		cache: false,
+		processData: false,
+		success: function(data) {
+			console.log('Success!');
+			get_family_cloud_files();
+			$("#family-cloud-add-container").hide();
+		},
+	});
+});
+
+function get_family_cloud_files() {
+	$.ajax({
+		url: '/get_cloud_files/',
+		method: 'POST',
+		data: '{}',
+		success: function(data) {
+			data = JSON.parse(data);
+			files = data['files'];
+			console.log(files);
+
+			$(".family-cloud-file-container").remove();
+
+			for(var i=0;i<files.length;i++) {
+				file = files[i];
+				id = file['id'];
+				filename = file['filename'];
+				extension = file['extension'];
+				file_size = file['size'];
+				username = file['username'];
+				timestamp = file['timestamp'];
+				load_cloud_file(id,filename,file_size,extension,username,timestamp);
+			}
+
+			$(".family-cloud-file-container").click(function(e) {
+				e.preventDefault();
+				var id = $(this).attr('id');
+				console.log('clicked container'+id);
+				download_cloud_file($(this).attr("id"));
+			})
+		}
+	});
+}
+
+function load_cloud_file(id,filename, filesize, extension, username, timestamp) {
+
+	console.log('ID      '+id);
+
+	html = '<div class="family-cloud-file-container" id="'+id+'" data-toggle="tooltip" title="'+timestamp+'">';
+	html += '<div class="family-cloud-file-extension-container">';
+	html += '<h5 style="margin: 0;font-size: 2rem;"> '+extension+' </h5>';
+	html += '</div>';
+	html += '<div class="cloud-filename-container">';
+	html += '<p style="margin: 0;">'+filename+'</p>';
+	html += '</div>';
+	html += '<p style="margin: 0;">'+username+'</p>';
+
+	new_element = $(html);
+	$("#family-cloud-container").append(new_element);
+
+	$('[data-toggle="tooltip"]').tooltip(); 
+
+}
+
+$(".family-cloud-file-container").click(function(e) {
+	e.preventDefault();
+	var id = $(this).attr('id');
+	console.log('clicked container'+id);
+	download_cloud_file($(this).attr("id"));
+})
+
+function download_cloud_file(id) {
+
+	console.log('IDDDDD '+id);
+
+	data = {
+		'file_id' : id 
+	}
+
+	window.location.href = '/download_cloud_file/'+id;
+
+	$.ajax({
+		url: '/download_cloud_file/',
+		method: 'POST',
+		data: JSON.stringify(data),
+		success: function(data) {
+		}
+	});
+
+}
+
+
 
 // ---------------------------- BUTTON EVENTS
 $("#content-back-button").click(function(e) {
@@ -1537,6 +1638,17 @@ $("#event-input-close-button").click(function(e) {
 	e.preventDefault();
 	// reload_list_input();
 	$("#family-event-create-wrapper").hide();
+});
+
+$("#cloud-input-close-button").click(function(e) {
+	e.preventDefault();
+	$("#family-cloud-add-container").hide();
+});
+
+$("#family-cloud-open-input").click(function(e) {
+	e.preventDefault();
+	console.log('CLICKED ADD');
+	$("#family-cloud-add-container").css('display','flex');
 });
 
 // KEYBOARD EVENTS

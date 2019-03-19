@@ -1,0 +1,32 @@
+ok 1 - TestSuite
+    ok 1 - passed_test
+    not ok 2 - test_case
+      ---
+      message: EXCEPTION AT LINE 20
+      method_name: test_testname
+      devices: 
+        DUT0: 
+          deviceID: 1234abcd
+          username: test_username1
+          email: test_email1
+        DUT1: 
+          deviceID: 5678efgh
+          username: test_username2
+          email: test_email2
+      case_parameters: 
+        method_name:
+          test_testname
+        logging_debug:
+          DEBUG
+        timeout:
+          10
+      suite_parameters: 
+        method_name:
+          test_testname
+        logging_debug:
+          DEBUG
+        timeout:
+          10
+      ...
+    1..2
+1..1

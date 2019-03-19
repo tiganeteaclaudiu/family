@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<testlink_data>
+	<testlink_host>http://localhost:8080/testlink/lib/api/xmlrpc/v1/xmlrpc.php</testlink_host>
+  <testlink_api_key>1805e078bfd7a428f6388159ce264dd0</testlink_api_key>
+</testlink_data>

@@ -1,4 +1,4 @@
-from flask import Flask, render_template,request, session, redirect, url_for
+from flask import Flask, render_template,request, session, redirect, url_for,send_file,send_from_directory
 from functools import wraps
 import flask_socketio
 import json
@@ -12,8 +12,9 @@ from sqlalchemy import MetaData
 from flask_socketio import SocketIO
 from flask_socketio import join_room, leave_room, send, emit
 import os
-from app.models import User,Family,Join_Request,Reminder,List,Event,Chat,ChatMessage
+from app.models import User,Family,Join_Request,Reminder,List,Event,Chat,ChatMessage,Cloud,File
 from random import randint
+from werkzeug.utils import secure_filename
 
 
 def logged_in(f):
@@ -145,9 +146,12 @@ def post_family():
 		cloud_dir_name = os.path.join(os.getcwd(),'Cloud')
 		family_cloud_dir_name = name+'_'+str(new_family.id)
 
-		family_cloud_dir_path = os.path.join(cloud_dir_name,family_cloud_dir_name)
+		family_cloud_dir_path = family_cloud_dir_name
 
-		# new_cloud = Cloud(family_id = new_family.id, dir_path=family_cloud_dir_path)
+		new_cloud = Cloud(family_id = new_family.id, dir_path=family_cloud_dir_path)
+
+		db.session.add(new_cloud)
+		db.session.commit()
 
 		print('post_family cloud_dir_name : {}'.format(cloud_dir_name))
 		print('post_family family_cloud_dir_name : {}'.format(family_cloud_dir_name))
@@ -836,6 +840,14 @@ def get_current_family_chat_object():
 
 	return chat_room
 
+def get_current_family_cloud_dir():
+	current_family = get_current_family_object()
+	cloud_dir = current_family.cloud[0].dir_path
+
+	cloud_path = os.path.join(app.config['CLOUD_PATH'],cloud_dir)
+
+	return cloud_path
+
 # ======================== CHAT ROOMS
 #
 @app.route('/post_chats/',methods=['POST'])
@@ -1029,3 +1041,92 @@ def create_cloud_directory(parent_dir=None, dir_name=None):
 	os.chdir(parent_dir)
 	print('create_cloud_dir navigated to {}'.format(os.getcwd()))
 	os.mkdir(dir_name)
+
+@app.route('/get_cloud_files/',methods=['POST'])
+def get_cloud_files():
+	files = get_current_family_object().cloud[0].files
+	family_cloud_dir = get_current_family_cloud_dir()
+
+	files_list = []
+
+	for file in files:
+		file_dict = {}
+		file_path = os.path.join(family_cloud_dir,file.filename)
+		
+		file_dict['filename'] = file.filename
+		file_dict['extension'] = file.extension
+		file_dict['file_size'] = file.size
+		file_dict['username'] = file.username
+		file_dict['timestamp'] = file.timestamp
+		file_dict['id'] = file.id
+
+		files_list.append(file_dict)
+
+	for file in files_list:
+		print(file)
+
+	return json.dumps({'files' : files_list})
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/upload_cloud_file/',methods=['POST'])
+def upload_cloud_file():
+	file = request.files['file']
+
+	family_dir = get_current_family_cloud_dir()
+
+	print('[CLOUD] Current family cloud dir: {}'.format(family_dir))
+
+	filename = secure_filename(file.filename)
+	file.save(os.path.join(family_dir, filename))
+
+	file_size = os.path.getsize(os.path.join(family_dir, filename))
+	print('[CLOUD] File size: {}'.format(file_size))
+
+	#add file to DB
+	db_file = File(cloud_id=get_current_family_object().cloud[0].id,
+					filename=filename,
+					extension=filename.split(".")[-1],
+					size=file_size,
+					username=session['username'],
+					timestamp=str(datetime.datetime.now())
+					)
+
+	db.session.add(db_file)
+	db.session.commit()
+
+	print('[CLOUD] upload_cloud_file file: ')
+	print('filename: {}'.format(filename))
+
+	print('[CLOUD] All cloud files:')
+	print(get_current_family_object().cloud[0].files)
+
+	return json.dumps({})
+
+@app.route('/download_cloud_file/<path:id>', methods=['GET', 'POST'])
+def download_cloud_file(id):
+	try:
+		# JSONstring = json.dumps(request.get_json(force=True))
+		# data = json.loads(JSONstring)
+
+		file_id = id
+
+		cloud_dir = get_current_family_cloud_dir()
+		file_to_send = File.query.filter_by(id=file_id).first()
+
+		print('[CLOUD] download_cloud_file file: {}'.format(file_to_send))
+		file_path = os.path.join(cloud_dir,file_to_send.filename)
+
+		print('[CLOUD] download_cloud_file file path: {}'.format(file_path))
+		send_file(file_path)
+
+		return send_from_directory(directory=cloud_dir, 
+									filename=file_to_send.filename,
+									as_attachment=True,
+									attachment_filename=file_to_send.filename)
+
+	except Exception as e:
+		print('#download_cloud_file ERROR: ')
+		print(e)
