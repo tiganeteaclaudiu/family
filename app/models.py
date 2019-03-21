@@ -14,6 +14,7 @@ class User(db.Model):
 	location = db.Column(db.String(128), nullable=False)
 	families = db.relationship('Family',secondary=family_identifier)
 	current_family = db.Column(db.Integer)
+	checkins = db.relationship('CheckIn', backref='user_checkins', lazy=True)
 
 	def dump(self):
 		print ("USER: {}:{} pass={}".format(self.username,self.email,self.password_hash))
@@ -30,6 +31,7 @@ class Family(db.Model):
 	events = db.relationship('Event', backref='family_events', lazy=True)
 	chat = db.relationship('Chat', backref='family_chat', lazy=True)
 	cloud = db.relationship('Cloud', backref='family_cloud', lazy=True)
+	checkins = db.relationship('CheckIn', backref='family_checkins', lazy=True)
 
 class Join_Request(db.Model):
 	id = db.Column(db.Integer, primary_key = True)
@@ -87,3 +89,11 @@ class File(db.Model):
 	size = db.Column(db.Integer, nullable=False)
 	username = db.Column(db.String(30), nullable=False)
 	timestamp = db.Column(db.String(100), nullable=False)
+
+class CheckIn(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	family_id = db.Column(db.Integer, db.ForeignKey('family.id'))
+	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+	timestamp = db.Column(db.String(100), nullable=False)
+	latitude = db.Column(db.String(100), nullable=False)
+	longitude = db.Column(db.String(100), nullable=False)

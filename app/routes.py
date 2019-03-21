@@ -6,15 +6,17 @@ import datetime
 from app import app
 from app import db
 from app import socketio
+import re
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from sqlalchemy import MetaData
 from flask_socketio import SocketIO
 from flask_socketio import join_room, leave_room, send, emit
 import os
-from app.models import User,Family,Join_Request,Reminder,List,Event,Chat,ChatMessage,Cloud,File
+from app.models import User,Family,Join_Request,Reminder,List,Event,Chat,ChatMessage,Cloud,File,CheckIn
 from random import randint
 from werkzeug.utils import secure_filename
+from sqlalchemy.exc import IntegrityError
 
 
 def logged_in(f):
@@ -34,12 +36,29 @@ def logged_in(f):
 @app.route('/index/')
 @logged_in
 def index():
-	no_family = check_no_family(session['username'])
-	return render_template('index.html',username = session['username'],no_family = no_family)
+
+	if 'logged_in' in session and session['logged_in'] == True:
+		no_family = check_no_family(session['username'])
+		print('==========================================')
+		print(session['logged_in'])
+		return render_template('index.html',username = session['username'],no_family = no_family)
+	else:
+		print("Operation unallowed without login: {}".format(f))
+		return redirect(url_for('login'))
 
 @app.route('/register/')
 def register():
 	return render_template('register.html')
+
+def parse_unique_key_error(error):
+	regex = re.compile(' [a-z]+\.([a-z]+)')
+	result = re.search(regex, error).groups(1)[0]
+
+	print('parse_unique_key_error result : {}'.format(result))
+
+	return result
+
+	 
 
 @app.route('/post_register/',methods=['POST'])
 def post_register():
@@ -50,17 +69,33 @@ def post_register():
 		username = data['username']
 		email = data['email']
 		password = data['password']
-		location = data['location_data']
+		confirm_password = data['confirm_password']
+		location = data['location']
+
+
+		if password != confirm_password:
+			return json.dumps({
+				'status' : 'failure',
+				'message' : "Password fields don't match. Try again"
+				})
 
 		new_user = User(username=username,email=email,password=password,location=location)
 		db.session.add(new_user)
-		db.session.commit()
+
+		try:
+			db.session.commit()
+		except IntegrityError as e:
+			# prin('post_register commit error:')
+			failed_unique_key = parse_unique_key_error(str(e))
+			return json.dumps({
+			'status' : 'failure',
+			'message' : '{} already in database. Please use another one.'.format(failed_unique_key)
+			})
 
 		print ('post_register added user:\n')
 		print ('username: {}'.format(username))
 		print ('email: {}'.format(email))
 		print ('password: {}'.format(password))
-		print ('location: {}'.format(location))
 
 		return json.dumps({
 			'status' : 'success'
@@ -110,6 +145,22 @@ def post_login():
 
 	except Exception as e:
 		print ('post_login ERROR: {}'.format(e))
+		return json.dumps({
+			'status' : 'failure'
+			})
+
+@app.route('/log_out/',methods=['POST'])
+def log_out():
+	try:
+		session['logged_in'] = ''
+		session['username'] = ''
+
+		print('log_out User logged out.')
+
+		return json.dumps({'status' : 'success'})
+
+	except Exception as e:
+		print ('log_out ERROR: {}'.format(e))
 		return json.dumps({
 			'status' : 'failure'
 			})
@@ -266,18 +317,35 @@ def query_families():
 	JSONstring = json.dumps(request.get_json(force=True))
 	data = json.loads(JSONstring)
 
+	skip_users_member_families = False
+
+	user = get_current_user()
+
 	family_list = []
 
 	try:
 
 		if data['query_type'] == 'name':
-
 			name = data['name']
 			location = data['location_data']
-			families = Family.query.filter(Family.name == name).filter(Family.location == location).all()
+			families = Family.query.filter(Family.name == name).\
+									filter(Family.location == location).\
+									all()
+
+			for family in families:
+				if family in get_current_user_families():
+					print('FOUND USER"S FAMILY')
+					families.remove(family)
+
 		elif data['query_type'] == 'id':
 			id = data['id']
 			families = Family.query.filter(Family.id == id).all()
+
+			for family in families:
+				if family in get_current_user_families():
+					print('FOUND USER"S FAMILY')
+					families.remove(family)
+					
 		elif data['query_type'] == 'user':
 			user = User.query.filter_by(username=data['username']).first()
 			families = user.families
@@ -285,6 +353,16 @@ def query_families():
 		print('query_families query result: {}'.format(families))
 
 		for family in families:
+
+			family_dict = {
+				'id' : family.id,
+				'name' : family.name,
+				'country' : family.country,
+				'location' : family.location,
+				'members' : len(family.members),
+				'already_member' : False
+				};
+
 			family_list.append({
 				'id' : family.id,
 				'name' : family.name,
@@ -292,6 +370,7 @@ def query_families():
 				'location' : family.location,
 				'members' : len(family.members)
 				})
+
 
 		print("Families: {}".format(family_list))
 
@@ -303,6 +382,8 @@ def query_families():
 	except Exception as e:
 		print('query_all_families ERROR: {}'.format(e))
 		return json.dumps({'status':'failure'})
+
+		
 
 
 @app.route('/post_join_request/',methods=['POST'])
@@ -338,38 +419,34 @@ def query_join_requests():
 		username = session['username']
 
 		user = User.query.filter_by(username=username).first()
-		families = user.families
+		family = get_current_family_object()
 
 		returned_data = []
 
-		for family in families:
-			print('FAMILY {}'.format(family))
+		requests = family.join_requests
 
-		for family in families:
-			requests = family.join_requests
+		requests_list = []
 
-			requests_list = []
+		for request in requests:
+			print('REQUEST:{}'.format(request.requester_id))
+			user = User.query.filter_by(id=request.requester_id).first()
 
-			for request in requests:
-				print('REQUEST:{}'.format(request.requester_id))
-				user = User.query.filter_by(id=request.requester_id).first()
+			data = {
+				'id' : user.id,
+				'name' : user.username,
+				'location' : user.location
+			}
 
-				data = {
-					'id' : user.id,
-					'name' : user.username,
-					'location' : user.location
-				}
+			requests_list.append(data)
 
-				requests_list.append(data)
+		print("requests_list: {}".format(requests_list))
 
-			print("requests_list: {}".format(requests_list))
+		family = Family.query.filter_by(id=family.id).first().name
 
-			family = Family.query.filter_by(id=family.id).first().name
-
-			returned_data.append({
-				'family' : family,
-				'requests' : requests_list
-				})
+		returned_data.append({
+			'family' : family,
+			'requests' : requests_list
+			})
 
 		print ("returned data: {}".format(returned_data))
 
@@ -816,6 +893,11 @@ def update_event():
 		print('update_event ERROR: {}'.format(e))
 		return json.dumps({'status':'failure'})
 
+def get_current_user():
+	user = User.query.filter_by(username=session['username']).first()
+
+	return user
+
 def get_current_family():
 	user = User.query.filter_by(username=session['username']).first()
 	print('get_current_family RESULT: {}'.format(user.current_family))
@@ -847,6 +929,12 @@ def get_current_family_cloud_dir():
 	cloud_path = os.path.join(app.config['CLOUD_PATH'],cloud_dir)
 
 	return cloud_path
+
+def get_current_user_families():
+	user = get_current_user()
+
+	families = user.families
+	return families
 
 # ======================== CHAT ROOMS
 #
@@ -1038,9 +1126,9 @@ def query_chat_messages():
 #-------------------------------------- CLOUD
 
 def create_cloud_directory(parent_dir=None, dir_name=None):
-	os.chdir(parent_dir)
 	print('create_cloud_dir navigated to {}'.format(os.getcwd()))
-	os.mkdir(dir_name)
+	os.path.join(parent_dir,dir_name)
+	os.mkdir(os.path.join(parent_dir,dir_name))
 
 @app.route('/get_cloud_files/',methods=['POST'])
 def get_cloud_files():
@@ -1130,3 +1218,104 @@ def download_cloud_file(id):
 	except Exception as e:
 		print('#download_cloud_file ERROR: ')
 		print(e)
+
+@app.route('/delete_cloud_file', methods=['GET','POST'])
+def delete_cloud_file():
+	try:
+		JSONstring = json.dumps(request.get_json(force=True))
+		data = json.loads(JSONstring)
+
+		id = data['id']
+
+		# event = List.query.filter_by(id=id).first()
+
+		cloud_dir = get_current_family_cloud_dir()
+		file_to_delete = File.query.filter_by(id=id).first()
+
+		filename = file_to_delete.filename
+		file_path = os.path.join(cloud_dir,filename)
+
+		print('[CLOUD] delete_cloud_file file path: {}'.format(file_path))
+
+		if os.path.exists(file_path):
+			os.remove(file_path)
+			db.session.delete(file_to_delete)
+			db.session.commit()
+			return json.dumps({'status':'success'})
+		else:
+			print("[CLOUD] ERROR:The file does not exist") 
+			return json.dumps({'status':'failure'})
+
+	except Exception as e:
+		print('delete_events ERROR: {}'.format(e))
+		return json.dumps({'status':'failure'})
+
+@app.route('/query_checkins/', methods=['GET','POST'])
+def query_checkins():
+
+	try:
+		family = get_current_family_object()
+		family_members = family.members
+
+		family_checkins = {}
+
+		print('[MAP] query checkins family members:')
+		print(family_members)
+
+		for member in family_members:
+			member_checkins = []
+			
+			checkins = member.checkins[-11:-1]
+			username = member.username
+
+			for checkin in checkins:
+				member_checkins.append({
+					'timestamp' : checkin.timestamp,
+					'latitude' : checkin.latitude,
+					'longitude' : checkin.longitude
+				})
+
+			family_checkins[username] = member_checkins
+
+		print('[MAP] query_chekcins family checkins:')
+		print(family_checkins)
+
+		return json.dumps({'status':'success','checkins' : family_checkins})
+	
+	except Exception as e:
+		print('query_checkins ERROR: {}'.format(e))
+		return json.dumps({'status':'failure'})
+
+@app.route('/post_checkin/',methods=['POST'])
+def post_checkin():
+	try:
+		JSONstring = json.dumps(request.get_json(force=True))
+		data = json.loads(JSONstring)
+
+		latitude = data['latitude']
+		longitude = data['longitude']
+
+		user_id = get_current_user().id
+		family_id = get_current_family_object().id
+		timestamp = str(datetime.datetime.now().strftime("%A, %d. %B %Y %I:%M%p"))
+
+		print('post_checkin timestamp: {}'.format(timestamp))
+
+		#try creating new CheckIn
+		check_in = CheckIn(family_id=family_id,
+							user_id=user_id,
+							timestamp=timestamp,
+							latitude=latitude,
+							longitude=longitude)
+
+		db.session.add(check_in)
+		db.session.commit()
+
+		print('[MAP] post_checkin family checkins:')
+		query_checkins()
+
+		return json.dumps({'status':'success'})
+
+	except Exception as e:
+		print('post_checkin ERROR: {}'.format(e))
+		return json.dumps({'status' : 'failure' })

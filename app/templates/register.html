@@ -23,33 +23,34 @@
     </head>
 <body style="background-color: #f85a3e;">
 
-<div id="wrapper" style="background-color: #f85a3e;color: #fed766;">
-
-	
-	<div id="content" style="background-color: #f85a3e;display: flex;justify-content: center;align-content: center;align-items: center;height: 100%;">
+	<div id="wrapper" style="height:100%;background-color: #f85a3e;color: #fed766;justify-content: center;align-items: center;">
 		
-	<div id="register-container" style="margin-bottom:0;min-width: 292px;min-height: 483px;">
-		<img src="../static/images/logo.png" style="width: 16%;position: absolute;top: 2%;" class="img-responsive pull-right">
-		<p style="font-size: 2rem;font-family: arial;">Register</p>
+	<div id="content" style="background-color: #2ad4ea;display: flex;justify-content: center;align-content: center;align-items: center;height: 100%;">
+		
+		<div id="register-container"style="margin-bottom:0;min-width: 292px;min-height: 483px;background-color:#333035">
+			<img src="../static/images/logo.png" style="width: 16%;position: absolute;top: 2%;" class="img-responsive pull-right">
+			<p style="font-size: 2rem;font-family: arial;">Register</p>
 
-		<p class='register-input-header'>Username</p>
-		<input type="text" class='register-input' id='register-username'>
+			<input type="text" class='login-input' placeholder='Username'  id='register-username'>
 
-		<p class='register-input-header'>Email</p>
-		<input type="text" class='register-input' id='register-email'>
+			<input type="text" class='login-input' placeholder='Email'  id='register-email'>
 
-		<p class='register-input-header'>Password</p>
-		<input class='register-input' type="password" id='register-password'>
+			<input class='login-input' type="password" placeholder='Password'  id='register-password'>
 
-		<p class='register-input-header'>Location (City)</p>
-		<input class='register-input' type="text" id='register-location'>
+			<input class='login-input' type="password" placeholder='Confirm Password'  id='register-password-confirm'>
 
-		<div id='register-submit'>Submit</div>
+			<input class='login-input' type="text" placeholder='Home Place'  id='register-location'>
+
+			<p id='registration-failure' style='margin-top:10px;text-align: start;position: absolute;bottom: 2%;display:none;'></p>
+
+			<div id='register-submit'>Submit</div>
+		</div>
+
 	</div>
-</div>
 
 </body>
 
 
 </body>
 </html>
+

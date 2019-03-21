@@ -1,0 +1,1 @@
+/home/claudiu/Desktop/LIcenta/app/static/js/register.js

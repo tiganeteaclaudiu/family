@@ -8,7 +8,7 @@ body, html {
 
 #wrapper {
 	width: 100%;
-	height: 100%;
+	height: 90%;
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
@@ -85,6 +85,31 @@ body, html {
     align-items: center;
 }
 
+#logout-button {
+	position: absolute;
+	right: 40px;
+	width: 140px;
+	height: 50%;
+	background-color: red;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	bottom: 25%;
+	border-radius: 8px;
+	cursor:pointer;
+}
+
+#logout-button:hover {
+	opacity: 0.7;
+}
+
+#logout-button h5 {
+	-webkit-user-select: none; /* Safari */        
+	-moz-user-select: none; /* Firefox */
+	-ms-user-select: none; /* IE10+/Edge */
+	user-select: none; /* Standard */
+}
+
 
 .content-2col {
 
@@ -116,7 +141,8 @@ body, html {
 	align-items: center;
 	padding-left: 2%;
 	position: absolute;
-	z-index: -1;
+	z-index: 10;
+	top:-12%;
 }
 
 #content-header {
@@ -264,6 +290,9 @@ body, html {
 	width: 100%;
 	height: 10%;
 	background-color: #2ad4ea;
+	position: absolute;
+	max-height: 90px;
+	bottom: 0;
 }
 
 #side-menu {
@@ -439,7 +468,11 @@ body, html {
 	border-bottom: 2px solid #fed766;
 	width: 100%;
 	margin-bottom: 7%;
-	color: #fed766;
+	color: white;
+	border-radius:7px;
+	height: 40px;
+	padding-left: 16px;
+	font-size: 1.3rem;
 }
 
 .login-input-header {
@@ -461,6 +494,23 @@ body, html {
 	color: #f85a3e;
 	font-size: 1.2rem;
 
+}
+
+#login-registration-button {
+	position: absolute;	bottom: 40px;
+	background-color: red;
+	width: 25%;
+	height: 40px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	color: white;
+	border-radius:10px;
+}
+
+#login-registration-button a {
+	color:white;
+	text-decoration: none;
 }
 
 #family-container {
@@ -514,7 +564,7 @@ body, html {
 .long-input-container {
 	width: 120%;
 	height: 10%;
-	margin-top: 13%;
+	margin-top: 5%;
 	border-radius: 8px;
 	display: flex;
 	padding: 2%;
@@ -627,6 +677,10 @@ body, html {
 	background-image: url('../images/icons/cloud.svg');
  }
 
+ .icon-x:before {
+	background-image: url('../images/icons/times.svg');
+ }
+
  /* STANDARD FLEXBOX ELEMENTS */
 
  .flex-start-row {
@@ -654,9 +708,6 @@ body, html {
 	max-width:700px;
 }
 
-#content_family-chat {
-	transform: translateY(-10%);
-}
 
 #family-chat-messages-container {
 	height: 95%;
@@ -754,9 +805,6 @@ body, html {
     width: 90%;
 }
 
-#content_family-cloud {
-	transform: translateY(-10%);
-}
 
 #family-cloud-container {
 	width: 100%;
@@ -785,6 +833,19 @@ body, html {
 	align-items: center;
 	justify-content: space-evenly;
 	cursor:pointer;
+	position:relative;
+}
+
+#family-cloud-add-container {
+	display:none;
+	flex-direction: column;
+	height: auto;
+	margin-top: 8%;
+	background-color: brown;
+	color: white;
+	width: 50%;
+	position: absolute;
+	right: 25%;
 }
 
 .family-cloud-file-extension-container {
@@ -803,6 +864,26 @@ body, html {
 	align-items: center;
 }
 
+.family-cloud-file-delete {
+	width: 20px;
+	height: 20px;
+	position: absolute;
+	right: 5px;
+	top: 5px;
+	border-radius: 3px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding-bottom: 4px;
+	padding-left: 5px;
+	filter:invert(100);
+	z-index:10;
+}
+
+.family-cloud-file-delete:hover {
+	background-color:red;
+}
+
 #family-cloud-add-button {
 	height: 70px;
 	background-color: red;
@@ -819,12 +900,14 @@ body, html {
 	align-self: flex-end;
 	position: absolute;
 	right: 2%;
+	user-select: none;
 }
 
 #family-cloud-open-input {
 	height: 70px;
 	background-color: red;
 	position: absolute;
+	z-index:1000;
 	right: 0;
 	top: -80px;
 	border-radius: 7px;
@@ -845,4 +928,116 @@ body, html {
 	white-space: nowrap;
 	overflow: hidden;
 	text-align: center;
+}
+
+/* ----------------------------- FAMILY MAP */
+
+#family-map-container {
+	height:100%;
+	width:80%;
+}
+
+.leaflet-pane{
+    img{
+        position: absolute;
+    }
+}
+
+#family-map-users-panel {
+	width: 20%;
+	height: 100%;
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	flex-direction: column;
+	border: 2px solid #2ad4ea;
+	border-radius: 10px 0px 0px 10px;
+}
+
+#family-map-checkins-panel {
+	width: 20%;
+	height: 100%;
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	flex-direction: column;
+	border: 2px solid #2ad4ea;
+	border-radius: 10px 0px 0px 10px;
+}
+
+#family-map-users-panel-header {
+	width: 100%;
+	height: 50px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border-bottom: 2px solid #2ad4ea;
+	background-color: #2ad4ea;
+}
+
+.family-map-users-panel-user {
+	width: 100%;
+	height: 50px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border-bottom: 2px solid #2ad4ea;
+	background-color: white;
+	color: black;
+	cursor: pointer;
+}
+
+.family-map-checkins-panel-checkin {
+	width: 100%;
+	height: 50px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border-bottom: 2px solid #2ad4ea;
+	background-color: white;
+	color: black;
+	cursor: pointer;
+}
+
+.family-map-users-panel-user h3 {
+	-webkit-user-select: none; /* Safari */        
+	-moz-user-select: none; /* Firefox */
+	-ms-user-select: none; /* IE10+/Edge */
+	user-select: none; /* Standard */
+	margin: 0;
+}
+
+
+.family-map-users-panel-user:hover {
+	background-color: #eaeaea;
+}
+
+#family-map-checkin-button {
+	position: absolute;
+	width: 100px;
+	height: 50px;
+	background-color: red;
+	top: 30px;
+	right: 30px;
+	z-index: 1000;
+	border-radius: 10px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	cursor: pointer;
+}
+
+#family-map-checkin-message {
+	background-color: red;
+	z-index: 1000;
+	display: none;
+	border-radius: 10px;
+	justify-content: center;
+	align-items: center;
+	cursor: pointer;
+	width: 30%;
+	height: 20%;
+	position: absolute;
+	left: 35%;
+	top: 40%;
 }

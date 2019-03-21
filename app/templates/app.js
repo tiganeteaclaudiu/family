@@ -21,13 +21,6 @@ menu_options = {
 					'name' : 'Join Requests',
 					'link' : 'join-requests',
 					funct : function() {
-						console.log("MERGE FUNCTIA!");
-						console.log("MERGE FUNCTIA!");
-						console.log("MERGE FUNCTIA!");
-						console.log("MERGE FUNCTIA!");
-						console.log("MERGE FUNCTIA!");
-						console.log("MERGE FUNCTIA!");
-						console.log("MERGE FUNCTIA!");
 						query_join_requests();
 						}
 				},
@@ -43,39 +36,39 @@ menu_options = {
 					'name' : 'Leave Family',
 					'link' : 'leave-family',
 					funct: function() {
-						query_families('user','leave-family-table','/leave_family/');
+						query_families('user','leave-family-table','/leave_family/','leave');
 
 					}
 				}
 			],
-		'join-requests' : [
-				{
-					'name' : 'Leave Family',
-					'link' : 'leave-family',
-					funct: function() {
-						console.log("MERGE FUNCTIA!");
-						console.log("MERGE FUNCTIA!");
-					}
-				},
-				{
-					'name' : 'test2',
-					'link' : 'join-family',
-					funct: function() {
-						console.log("MERGE FUNCTIA2!");
-						console.log("MERGE FUNCTIA2!");
+		// 'join-requests' : [
+		// 		{
+		// 			'name' : 'Leave Family',
+		// 			'link' : 'leave-family',
+		// 			funct: function() {
+		// 				console.log("MERGE FUNCTIA!");
+		// 				console.log("MERGE FUNCTIA!");
+		// 			}
+		// 		},
+		// 		{
+		// 			'name' : 'test2',
+		// 			'link' : 'join-family',
+		// 			funct: function() {
+		// 				console.log("MERGE FUNCTIA2!");
+		// 				console.log("MERGE FUNCTIA2!");
 
-					}
-				}
-			],
-		'leave-family' : [
-			{
-				'name' : 'test2',
-				'link' : 'create-family',
-				funct: function() {
-					console.log('TESTTESTESTESTEST');
-				}
-			}
-		]
+		// 			}
+		// 		}
+		// 	],
+		// 'leave-family' : [
+		// 	{
+		// 		'name' : 'test2',
+		// 		'link' : 'create-family',
+		// 		funct: function() {
+		// 			console.log('TESTTESTESTESTEST');
+		// 		}
+		// 	}
+		// ]
 	},
 	'family-menu' : {
 		'family-menu-main-panel' : [
@@ -91,7 +84,6 @@ menu_options = {
 					'name' : 'Lists',
 					'link' : 'family-lists',
 					funct : function() {
-						console.log('merge functia pt lists!');
 						query_lists();
 					}
 				},
@@ -99,7 +91,6 @@ menu_options = {
 					'name' : 'Calendar',
 					'link' : 'family-calendar',
 					funct : function() {
-						console.log("MERGE FUNCTIA pt reminder!");
 						query_events();
 					}
 				}
@@ -126,6 +117,18 @@ menu_options = {
 				}
 			}
 		]
+	},
+	'family-map' : {
+		'family-map-main-panel' : [
+			{
+				'name' : 'Family Map',
+				'link' : 'family-map',
+				funct : function() {
+					init_family_map();
+					load_checkins();
+				}
+			}
+		]
 	}
 }
 
@@ -136,22 +139,68 @@ menu_options = {
 
 show_content('no-family');
 
+$("#user-menu").hide();
+$("#family-menu").hide();
+$("#family-chat").hide();
+$("#family-cloud").hide();
+$("#family-map").hide();
+$("#family-droplist").hide();
+$("#switch-family-header").hide();
+
+$("#content-back-button").click(function(e) {
+	e.preventDefault();
+
+	show_content('no-family');
+});
+
 {% else %}
 
+$("#content-back-button").hide();
 load_sidebar_options('user-menu');
+show_content('user-menu-main-panel');
 
 {% endif %}
+
+$('#footer').click(function(e) {
+	log_out();
+})
+
+function log_out() {
+	$.ajax({
+		url : '/log_out/',
+		method : 'POST',
+		success : function(data) {
+			window.location.href = '../index/';
+		}
+	});
+}
+
+$("#logout-button").click(log_out);
 
 function load_menu_options() {
 	console.log('load_menu_options called');
 	for (var key in menu_options) {
 		console.log('KEY: '+key);
-		load_menu_options_events(key);
+		load_menu_options_events(key,menu_options[key]);
 	}
 }
 
-function load_menu_options_events(key) {
+function load_menu_options_events(key,submenus) {
 	$("#"+key).click(function(e) {
+
+		first_page = submenus[key+'-main-panel'][0]['link'];
+		first_page_funct = submenus[key+'-main-panel'][0]['funct'];
+		first_page_name = submenus[key+'-main-panel'][0]['name']
+		console.log('first_page: '+first_page)
+
+		show_content(first_page);
+		first_page_funct();
+
+		$("#content-header").html(first_page_name);
+
+		// 'family-cloud' : {
+		// 	'family-cloud-main-panel' 
+
 		console.log('CLICKED: ');
 		console.log($(this));
 		load_sidebar_options(key);
@@ -265,6 +314,8 @@ function load_menu_links(menu, menu_option) {
 		e.preventDefault();
 		link = $(this).attr('href');
 
+		$("#content-header").html($(this).html());
+
 		if (link in menu ) {
 			console.log("FOUND AICI ASIDA SDASDASDASDASASD" + link);
 			link2 = link;
@@ -323,7 +374,7 @@ $("#family-create-button").click(function(e) {
 	e.preventDefault();
 
 	hide_all_content();
-	show_content('created-family');
+	show_content('create-family');
 });
 
 function hide_cursor_buttons(table_id) {
@@ -343,7 +394,7 @@ function hide_cursor_buttons(table_id) {
 
 
 
-function refresh_cursor_button_event(table_id,url,extra_data) {
+function refresh_cursor_button_event(table_id,url,extra_data,body) {
 
 	if (typeof extra_data === 'undefined') { extra_data = ''; }
 
@@ -353,7 +404,7 @@ function refresh_cursor_button_event(table_id,url,extra_data) {
 	$(table_id+" td").click(function(e) {
 	    console.log("row click");
 	    var num = Math.floor((Math.random() * 10) + 1);
-	    var div = $('<div class="cursor-button">Send Join Request</div>');
+	    var div = $('<div class="cursor-button">'+body+'</div>');
 	    container = $(table_id).parent();
 	    console.log('REFRESH CONTAINER: ');
 	    console.log(container);
@@ -420,31 +471,40 @@ function empty_table(table_id) {
 	$(table_id+" tr, h3").remove();
 }
 
-function query_families(query_type, table_id, popup_url) {
+function query_families(query_type, table_id, popup_url, scope) {
 
 	if (typeof popup_url === 'undefined') { popup_url = ''; }
+	//hack: call query families for leave_family
+	// member families were being taken off the response
+	if (typeof scope === 'undefined') { scope = ''; }
 
 	data = {};
 
 	table_id = "#" + table_id;
 
 	if (query_type === 'name') {
-		data = JSON.stringify({
+		data = {
 			'query_type' : 'name',
 			'name' : $('#join-family-name').val(),
 			'location_data': $('#join-family-location').val()
-		});
+		};
 	} else if (query_type === 'id') {
-		data = JSON.stringify({
+		data = {
 			'query_type' : 'id',
 			'id' : $("#join-family-id").val()
-		});
+		};
 	} else if (query_type === 'user') {
-		data = JSON.stringify({
+		data = {
 			'query_type' : 'user',
 			'username' : '{{ username }}'
-		});
+		};
 	}
+
+	if (scope === 'leave') {
+		data['leave'] = true;
+	}
+
+	data = JSON.stringify(data);
 
 	$.ajax({
 			url : '/query_families/',
@@ -478,14 +538,21 @@ function query_families(query_type, table_id, popup_url) {
 			                    <td> `+family['location']+` </td>
 			                    <td> `+family['members']+` </td>
 			                </tr>
-					`}
+						`;
+
+					}
 
 					$(table_id).append(html);
 
 					console.log("POPUP_URL = "+popup_url)
+					console.log('===========-=-=-=-=-= '+table_id)
 
 					if(popup_url !== '') {
-						refresh_cursor_button_event(table_id,popup_url);
+						if (table_id === '#leave-family-table') {
+							refresh_cursor_button_event(table_id,popup_url,'','Leave Family');
+						} else {
+							refresh_cursor_button_event(table_id,popup_url,'','Send Join Request');
+						}
 					}
 
 
@@ -519,7 +586,7 @@ function query_join_requests() {
 			html = `<tr>
 	                    <th> ID </th>
 	                    <th> Name </th>
-	                    <th> Location </th>
+	                    <th> Home Place </th>
 	                    <th> Family </th>
 	                </tr>`
 
@@ -551,7 +618,7 @@ function query_join_requests() {
 						'family' : current_family
 					}
 
-					refresh_cursor_button_event('#join-requests-table','/accept_join_request/',extra_data);
+					refresh_cursor_button_event('#join-requests-table','/accept_join_request/',extra_data,'Accept Join Request');
 
 				}
 
@@ -563,11 +630,6 @@ function query_join_requests() {
 
 }
 
-
-
-function add_request_cursor_button() {
-	refresh_cursor_button_event('join-requests-table','/accept_join_request/');
-}
 
 
 function add_family_member(username,family) {
@@ -597,7 +659,8 @@ function load_family_droplist() {
 
 	data = {
 		'query_type' : 'user',
-		'username' : '{{ username }}'
+		'username' : '{{ username }}',
+		'droplist_query' : true
 	}
 
 	data = JSON.stringify(data);
@@ -756,7 +819,7 @@ function load_reminders(reminders) {
 	console.log('load_reminders data: '+JSON.stringify(reminders));
 
 	table = $("#reminders-table");
-	table.find('tr').remove();
+	table.find('tr').not("#reminders-table-header").remove();
 
 	for (var i=0;i<=reminders.length-1;i++)	{
 		console.log('reminder: '+reminders[i]);
@@ -767,7 +830,7 @@ function load_reminders(reminders) {
 		html += '<td>'+reminders[i]['date_time']+'</td>';
 		html += '</tr>';
 		element = $(html);
-		var delete_checkbox = $('<td>Delete:<input type="checkbox" style="margin-left:5px;"></td>');
+		var delete_checkbox = $('<td><input type="checkbox" style="margin-left:5px;"></td>');
 		table.append(element);
 		element.append(delete_checkbox);
 		load_reminder_event(delete_checkbox, element);
@@ -1489,13 +1552,27 @@ function get_family_cloud_files() {
 				load_cloud_file(id,filename,file_size,extension,username,timestamp);
 			}
 
-			$(".family-cloud-file-container").click(function(e) {
-				e.preventDefault();
-				var id = $(this).attr('id');
-				console.log('clicked container'+id);
-				download_cloud_file($(this).attr("id"));
-			})
+			add_cloud_file_container_events();
+
 		}
+	});
+}
+
+function add_cloud_file_container_events() {
+	$(".family-cloud-file-container").click(function(e) {
+		e.preventDefault();
+		var id = $(this).attr('id');
+		console.log('clicked container'+id);
+		download_cloud_file($(this).attr("id"));
+	})
+
+	$(".family-cloud-file-delete").click(function(e) {
+		e.preventDefault();
+		e.stopPropagation();
+		e.cancelBubble = true;
+		var id = $(this).parent().attr('id');
+		$(this).parent().tooltip('hide');
+		delete_cloud_file(id);
 	});
 }
 
@@ -1511,6 +1588,8 @@ function load_cloud_file(id,filename, filesize, extension, username, timestamp) 
 	html += '<p style="margin: 0;">'+filename+'</p>';
 	html += '</div>';
 	html += '<p style="margin: 0;">'+username+'</p>';
+
+	html += "<div class='family-cloud-file-delete'><span class='icon icon-x' aria-hidden='true'></span></div>"
 
 	new_element = $(html);
 	$("#family-cloud-container").append(new_element);
@@ -1546,15 +1625,259 @@ function download_cloud_file(id) {
 
 }
 
+function delete_cloud_file(id) {
 
+	data = {
+		'id' : id
+	}
+
+	$.ajax({
+		url: '/delete_cloud_file',
+		method: 'POST',
+		data: JSON.stringify(data),
+		success: function(data) {
+			data = JSON.parse(data);
+			status = data['status'];
+			
+			if(status === 'success') {
+				get_family_cloud_files();
+			}
+		}
+	});
+
+}
+
+//---------------------------------- FAMILY MAP
+
+map = '';
+
+function init_family_map() {
+
+	try {
+
+		map = new L.Map('family-map-container');
+
+		// create the tile layer with correct attribution
+		var osmUrl='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+		var osmAttrib='Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors';
+		var osm = new L.TileLayer(osmUrl, {minZoom: 12, maxZoom: 20, attribution: osmAttrib});		
+
+		//Create CHECK-IN button
+		checkin_button_html = `<div id='family-map-checkin-button'>
+							<h5 style="color: white;margin: 0;">Check-In</h5>
+						</div>`;
+
+		checkin_button = $(checkin_button_html);
+
+		$(".leaflet-control-container").append(checkin_button);
+
+		//Create CHECKED-IN message element
+		checkin_message_html = `<div id="family-map-checkin-message">
+									<h2 style="color: white;margin: 0;">Checked in!</h2>
+								</div>`;
+
+		checkin_message = $(checkin_message_html);
+
+		$(".leaflet-control-container").append(checkin_message);
+
+		//create CHECK-IN button event
+
+		create_map_checkin_button_event(checkin_button);
+
+		// start the map in South-East England
+		// 46.78415, 23.6099
+
+		latitude = '';
+		longitude = '';
+
+		// map.setView(new L.LatLng(46.78415, 23.60993),16);
+		map.addLayer(osm);
+
+		map.invalidateSize();
+
+		setTimeout(function () { map.invalidateSize() }, 800);
+
+		navigator.geolocation.getCurrentPosition(function(location) {
+			latitude = location.coords.latitude;
+			longitude = location.coords.longitude;
+
+			console.log('USER LOCATION:' + latitude + ' ' + longitude);
+
+			map.setView(new L.LatLng(latitude, longitude),16);
+
+			var marker = L.marker([latitude, longitude]).addTo(map);
+
+		});
+
+	} catch(err) {
+		return '';
+	}
+
+}
+
+function create_map_checkin_button_event(checkin_button) {
+
+	checkin_button.click(function(e) {
+		
+		//get current position using geolocate
+		navigator.geolocation.getCurrentPosition(function(location) {
+			latitude = location.coords.latitude;
+			longitude = location.coords.longitude;
+	
+			console.log('USER LOCATION:' + latitude + ' ' + longitude);
+	
+			add_map_checkin(latitude, longitude);
+	
+		  });
+
+	})
+
+}
+
+function add_map_checkin(latitude, longitude) {
+
+	data = JSON.stringify({
+		'latitude' : latitude,
+		'longitude' : longitude
+	});
+
+	$.ajax({
+		url: '/post_checkin/',
+		method: 'POST',
+		data: data,
+		success: function(data) {
+			data = JSON.parse(data);
+			if(data['status'] === 'success') {
+				load_checkins();
+				$("#family-map-checkin-message").css('display','flex');
+				setTimeout(function() {
+					$("#family-map-checkin-message").hide();
+				},3000);
+			}
+
+		}	
+	});
+
+}
+
+var popup = L.popup();
+
+// function onMapClick(e) {
+//     popup
+//         .setLatLng(e.latlng)
+//         .setContent("You clicked the map at " + e.latlng.toString())
+//         .openOn(map);
+// }
+
+function load_checkins() {
+	console.log('entered load_checkins');
+	$.ajax({
+		url: '/query_checkins/',
+		method: 'POST',
+		data: JSON.stringify({}),
+		success: function(data) {
+			data = JSON.parse(data);
+			if(data['status'] === 'success') {
+
+				$(".family-map-users-panel-user").remove();
+
+				checkins = data['checkins'];
+				for (var key in checkins) {
+					add_checkins_user(key, checkins[key]);
+				}
+			}
+
+		}	
+	});
+}
+
+
+function add_checkins_user(username, checkins) {
+
+	console.log('add_checkins_user data:');
+	console.log(username);
+	console.log(checkins);
+
+	if(checkins.length === 0) {
+		return 'error';
+	}
+
+	//create side panel user
+
+	user_html = `<div class="family-map-users-panel-user">
+					<h5 style="margin: 0;">`+username+`</h5>
+				 </div>`;
+	user_panel_element = $(user_html);
+
+	last_checkin = checkins[checkins.length-1];
+
+	console.log('last checkin:' + last_checkin);
+
+	$("#family-map-users-panel").append(user_panel_element);
+
+	create_map_panel_user_events(user_panel_element, last_checkin, checkins);
+
+}
+
+function create_map_panel_user_events(user_panel_element, last_checkin, checkins) {
+
+	user_panel_element.click(function(e) {
+		//set view to last checkin of user
+		map.setView(new L.LatLng(last_checkin['latitude'], last_checkin['longitude']),16);
+		var marker = L.marker([last_checkin['latitude'], last_checkin['longitude']]).addTo(map);
+
+		popup
+        .setLatLng(new L.LatLng(last_checkin['latitude'], last_checkin['longitude']))
+        .setContent($(this).html()+"Last Check-In.")
+		.openOn(map);
+		
+		$("#family-map-checkins-panel").css('display','flex');
+		$(".family-map-checkins-panel-checkin").remove();
+
+		for(var i=0;i< checkins.length;i++) {
+			checkin_html = `<div class="family-map-checkins-panel-checkin">
+								<p style="margin: 0;text-align:center;">`+checkins[i]['timestamp']+`</h5>
+							</div>`;
+			checkin_panel_element = $(checkin_html);
+			$("#family-map-checkins-panel").append(checkin_panel_element);
+
+			create_map_panel_checkins_events(checkin_panel_element, checkins[i]);
+
+
+		}
+
+	});
+
+}
+
+function create_map_panel_checkins_events(checkin_panel_element, checkin) {
+	checkin_panel_element.click(function(e) {
+		e.preventDefault();
+
+		latitude = checkin['latitude'];
+		longitude = checkin['longitude'];
+
+		map.setView(new L.LatLng(latitude, longitude),16);
+		var marker = L.marker([latitude, longitude]).addTo(map);
+
+		popup
+        .setLatLng(new L.LatLng(latitude, longitude))
+        .setContent('Check-In at '+checkin['timestamp'])
+		.openOn(map);
+
+	});
+}
 
 // ---------------------------- BUTTON EVENTS
-$("#content-back-button").click(function(e) {
+
+function update_back_button_event(page) {
+	$("#content-back-button").click(function(e) {
 	e.preventDefault();
 	console.log(current_family);
 	// query_reminders();
-	add_lists();
-});
+	});
+}
+
 
 $("#family-droplist").change(function() {
 	value = $(this).val();
@@ -1650,6 +1973,8 @@ $("#family-cloud-open-input").click(function(e) {
 	console.log('CLICKED ADD');
 	$("#family-cloud-add-container").css('display','flex');
 });
+
+//------------------------------ CLOUD
 
 // KEYBOARD EVENTS
 

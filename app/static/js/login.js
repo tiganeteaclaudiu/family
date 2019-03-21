@@ -43,7 +43,9 @@ $(document).ready(function(){
 					console.log('logged_in')
 					window.location.href = '../index/';
 				}
-				else console.log("Login failed");
+				else {
+					$("#login-failure").show();
+				}
 			}
 		});
 	}

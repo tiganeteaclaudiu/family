@@ -10,6 +10,7 @@ $("#register-submit").click(function(){
 	username = $("#register-username");
 	email = $("#register-email");
 	password = $("#register-password");
+	password_confirm = $("#register-password-confirm");
 	location_data = $("#register-location");
 	submit = $("#register-submit");
 
@@ -17,7 +18,8 @@ $("#register-submit").click(function(){
 		'username' : username.val(),
 		'email' : email.val(),
 		'password' : password.val(),
-		'location_data' : location_data.val()
+		'confirm_password' : password_confirm.val(),
+		'location' : location_data.val()
 	});
 
 	$.ajax({
@@ -30,33 +32,10 @@ $("#register-submit").click(function(){
 			if(data['status'] === 'success') {
 				window.location.href = '../login/';
 			}
-			else console.log("Register failed");
-		}
-	});
-});
-
-$("#family-submit").click(function(){
-	console.log('Submitted data.');
-	username = $("#user-username");
-	family = $("#family-name");
-	submit = $("#family-submit");
-
-	data = JSON.stringify({
-		'username' : username.val(),
-		'family' : family.val()
-	});
-
-	$.ajax({
-		url: '/add_family_member/',
-		method: 'POST',
-		data: data,
-		success: function(data) {
-			console.log('add_family_member success');
-			// data = JSON.parse(data);
-			// if(data['status'] === 'success') {
-			// 	window.location.href = '../index/';
-			// }
-			// else console.log("Register failed");
+			else {
+				$("#registration-failure").html(data['message']);
+				$("#registration-failure").show();
+			}
 		}
 	});
 });
