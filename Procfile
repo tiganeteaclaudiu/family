@@ -1,1 +1,1 @@
-web: gunicorn -k eventlet --log-level=DEBUG app:app
+web: gunicorn --worker-class socketio.sgunicorn.GeventSocketIOWorker --log-level=DEBUG app.app:app
