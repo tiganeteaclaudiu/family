@@ -5,6 +5,10 @@ from sqlalchemy import MetaData
 from flask_socketio import SocketIO
 import os
 
+import eventlet
+eventlet.monkey_patch()
+
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config(object):
@@ -53,7 +57,7 @@ print('CURRENT WORKING DIR: {}'.format(os.getcwd()))
 # except Exception as e:
 # 	print(e)
 
-from routes import *
+from . import routes
 
 if __name__ == "__main__":
-	socketio.run(app)
+	socketio.run(app,async_mode='eventlet')

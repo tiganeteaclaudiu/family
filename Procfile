@@ -1,1 +1,1 @@
-web: python ./app/app.py
+web: gunicorn --worker-class eventlet --log-level=DEBUG app.app:app
