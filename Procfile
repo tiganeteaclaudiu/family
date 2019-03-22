@@ -1,1 +1,1 @@
-web: gunicorn app.app:app --log-level=DEBUG
+web: gunicorn --worker-class gevent -w 5 app.app:app
