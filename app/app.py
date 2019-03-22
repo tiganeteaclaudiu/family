@@ -53,7 +53,7 @@ print('CURRENT WORKING DIR: {}'.format(os.getcwd()))
 # except Exception as e:
 # 	print(e)
 
-from . import routes
+from routes import *
 
 if __name__ == "__main__":
 	socketio.run(app)
