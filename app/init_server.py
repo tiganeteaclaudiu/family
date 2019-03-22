@@ -27,8 +27,6 @@ migrate = Migrate(app, db)
 
 socketio = SocketIO(app)
 
-socketio.run(app)
-
 from app.models import User, Family
 
 # u = User(username='claudiu10',email='claudiu10@gmail.com',password='claudiu')
@@ -55,3 +53,7 @@ from app.models import User, Family
 # 	print(e)
 
 from app import routes
+
+if __name__ == "__main__":
+	socketio.run(app)
+
