@@ -18,6 +18,7 @@ from random import randint
 from werkzeug.utils import secure_filename
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash, check_password_hash
+import subprocess
 
 def logged_in(f):
 	@wraps(f)
@@ -38,6 +39,7 @@ def logged_in(f):
 def index():
 
 	print('CURRENT WORKING DIR: {}'.format(os.getcwd()))
+	print(subprocess.check_output('ls',shell=True))
 
 	if 'logged_in' in session and session['logged_in'] == True:
 		no_family = check_no_family(session['username'])
