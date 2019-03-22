@@ -37,6 +37,8 @@ def logged_in(f):
 @logged_in
 def index():
 
+	print('CURRENT WORKING DIR: {}'.format(os.getcwd()))
+
 	if 'logged_in' in session and session['logged_in'] == True:
 		no_family = check_no_family(session['username'])
 		print('==========================================')

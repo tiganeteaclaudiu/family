@@ -27,6 +27,9 @@ migrate = Migrate(app, db)
 
 socketio = SocketIO(app)
 
+
+# os.chdir(os.path.dirname(os.getcwd()))
+print('CURRENT WORKING DIR: {}'.format(os.getcwd()))
 # u = User(username='claudiu10',email='claudiu10@gmail.com',password='claudiu')
 # v = User(username='claudiu9',email='claudiu11@gmail.com',password='claudiu')
 # w = User(username='claudiu8',email='claudiu12@gmail.com',password='claudiu')
@@ -53,5 +56,5 @@ socketio = SocketIO(app)
 from . import routes
 
 if __name__ == "__main__":
-	app.run()
 
+	app.run()
