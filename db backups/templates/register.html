@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+ <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+        <title>Family</title>
+
+        <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+
+        <link href="{{ url_for('static', filename='css/app.css') }}" rel="stylesheet">
+
+        <link href="{{ url_for('static', filename='fonts/glyphicons.css') }}" rel="stylesheet">
+
+        <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.3.1.js') }}"></script>
+
+        <script type="text/javascript" src="{{ url_for('static', filename='js/register.js') }}"></script>
+
+        <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.js') }}"></script>
+
+
+    </head>
+<body style="background-color: #f85a3e;">
+
+	<div id="wrapper" style="height:100%;background-color: #f85a3e;color: #fed766;justify-content: center;align-items: center;">
+		
+	<div id="content" style="background-color: #2ad4ea;display: flex;justify-content: center;align-content: center;align-items: center;height: 100%;">
+		
+		<div id="register-container"style="margin-bottom:0;min-width: 292px;min-height: 483px;background-color:#333035">
+			<img src="../static/images/logo.png" style="width: 16%;position: absolute;top: 2%;" class="img-responsive pull-right">
+			<p style="font-size: 2rem;font-family: arial;">Register</p>
+
+			<input type="text" class='login-input' placeholder='Username'  id='register-username'>
+
+			<input type="text" class='login-input' placeholder='Email'  id='register-email'>
+
+			<input class='login-input' type="password" placeholder='Password'  id='register-password'>
+
+			<input class='login-input' type="password" placeholder='Confirm Password'  id='register-password-confirm'>
+
+			<input class='login-input' type="text" placeholder='Home Place'  id='register-location'>
+
+			<p id='registration-failure' style='margin-top:10px;text-align: start;position: absolute;bottom: 2%;display:none;'></p>
+
+			<div id='register-submit'>Submit</div>
+		</div>
+
+	</div>
+
+</body>
+
+
+</body>
+</html>
+

@@ -1,0 +1,384 @@
+
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Family</title>
+        <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/app.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='fonts/glyphicons.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/leaflet.css') }}" rel="stylesheet">
+        <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.3.1.js') }}"></script>
+        <script type='text/javascript' src='{{ url_for("static", filename="js/popper.js") }}'></script>
+        <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.js') }}"></script>
+        <script type='text/javascript' src='{{ url_for("static", filename="js/moment.js") }}'></script>
+        <script type='text/javascript' src='{{ url_for("static", filename="js/fullcalendar.js") }}'></script>
+        <!-- <script type='text/javascript' src='{{ url_for("static", filename="js/fullcalendar.min.js") }}'></script>
+            <script type='text/javascript' src='{{ url_for("static", filename="js/gcal.js") }}'></script>
+            <script type='text/javascript' src='{{ url_for("static", filename="js/gcal.min.js") }}'></script>
+            <script type='text/javascript' src='{{ url_for("static", filename="js/locale-all.js") }}'></script> -->
+        <link href="{{ url_for('static', filename='css/fullcalendar.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/fullcalendar.min.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/fullcalendar.print.css') }}" media="print" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/fullcalendar.print.min.css') }}" rel="stylesheet">
+        <script type='text/javascript' src='{{ url_for("static", filename="js/socket.io.min.js") }}'></script>
+        <script type='text/javascript' src='{{ url_for("static", filename="js/leaflet-src.js") }}'></script>
+        <script type='text/javascript' src='{{ url_for("static", filename="js/countries.js") }}'></script>
+        <script>
+            {% include 'app.js' %}
+            
+        </script>
+    </head>
+    <body>
+        <div id='wrapper'>
+            <div id='header'>
+                <div id='logo-container'>
+                    <img src="../static/images/logo.png" style="width: 50%;" class="img-responsive pull-right">
+                </div>
+                <div class="menu-option" id='user-menu'>
+                    <span class="glyphicon glyphicon-home" aria-hidden="true"></span>
+                </div>
+                <div class="menu-option" id='family-menu'>
+                    <span class="icon icon-users" aria-hidden="true"></span>
+                </div>
+                <div class="menu-option" id='family-chat'>
+                    <span class="icon icon-chat" aria-hidden="true"></span>
+                </div>
+                <div class="menu-option" id='family-cloud'>
+                    <span class="icon icon-cloud" aria-hidden="true"></span>
+                </div>
+                <div class="menu-option" id='family-map'>
+                    <span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span>
+                </div>
+                <div style="position: absolute;right: 0%;width: 23%;" class="menu-droplist-container">
+                    <h5 id='switch-family-header' style="color: white;margin: 0;margin-right: 7%;"> Switch family: </h5>
+                    <select name="family" id="family-droplist" class='droplist-styled'>
+                    </select>
+                </div>
+            </div>
+            <div id='content-container'>
+                <div id="side-menu">
+                    <div id='side-menu-header'>Main Panel</div>
+                    <!-- <div style="width: 100%;height: 90%;display: flex;justify-content: center;align-items: center;font-size: 1.5rem;text-align: center;">Please create or join a family! {{ no_family }}</div> -->
+                </div>
+                <div id="content">
+                    <div id='content-header-container'>
+                        <span class="glyphicon glyphicon-home content-header-icon" aria-hidden="true"></span>
+                        <p id='content-header'>Home</p>
+                        <span class="glyphicon glyphicon-arrow-left content-header-icon" aria-hidden="true" id='content-back-button'></span>
+                        <p id="content-description"></p>
+                    </div>
+                    <div class="content-2col" id='content_user-menu-main-panel' style='display:none;'>
+                        <div class='content-2col-col'>
+                            <div id='no-family-image' style='margin-right:-20%;'>
+                                <img src="../static/images/family.png" style="width: 70%;" class="img-responsive pull-right">
+                            </div>
+                        </div>
+                        <div class="content-2col-col" style="justify-content: center;margin-right: 15%;">
+                            <h1 style="color:#636363">Welcome!</h1>
+                            <h5 style="color:#636363">Navigate the menus and keep track of the things that matter.</h5>
+                            <h5 style="color:#636363;"><b>Newly added:</b></h5>
+                            <h5 style="color:#636363">-Family Chat: realtime chat for you and your loved ones!</h5>
+                            <h5 style="color:#636363">-Family Cloud: never lose an important family photo or document!</h5>
+                         </div>
+                    </div>
+                    <div class="content-2col" id='content_no-family' style='display:none;'>
+                        <div class='content-2col-col'>
+                            <div id='no-family-image' style='margin-right:-20%;'>
+                                <img src="../static/images/family.png" style="width: 70%;" class="img-responsive pull-right">
+                                <div id='logo-credit'>
+                                    <p>Icons made by
+                                        <a href="https://www.freepik.com/" title="Freepik">Freepik</a> from
+                                        <a href="https://www.flaticon.com/" 			    title="Flaticon">www.flaticon.com</a> is licensed by
+                                        <a href="http://creativecommons.org/licenses/by/3.0/" 			    title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY
+                                        </a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class='content-2col-col' style='justify-content: center;margin-right: 15%;'>
+                            <h1 style='color:#636363'>You are not a member of any family.</h1>
+                            <h2 style='color:#8c8c8c'>Either create a family, or join one!</h2>
+                            <div id='no-family-button-container'>
+                                <div class='no-family-button' id='family-join-button'>
+                                    <p>Join</p>
+                                </div>
+                                <div class='no-family-button' id='family-create-button'>
+                                    <p>Create</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="content-2col" id='content_join-family' style='display:none;'>
+                        <div id='join-family-container'>
+                            <h5 id="join-family-header"> Join a family! </h5>
+                            <div class="content-auto-height-row" id='join-family-name-row'>
+                                <input id='join-family-name' type="text" placeholder="Name" class='input-styled' style="width: 30%;margin-right: 5%;">
+                                <input id='join-family-location' type="text" placeholder="Location (City)" class='input-styled' style="width: 30%;margin-right: 5%;">
+                                <span id='join-family-search-name' aria-hidden="true" class="glyphicon glyphicon-search content-header-icon" style="cursor:pointer;color: #f85a3e;font-size: 2.4rem;"></span>
+                            </div>
+                            <div class="content-auto-height-row" id='join-family-id-row' style='display: none;'>
+                                <input id='join-family-id' type="text" placeholder="ID" class='input-styled' style="width: 30%;margin-right: 5%;">
+                                <span id='join-family-search-id' aria-hidden="true" class="glyphicon glyphicon-search content-header-icon" style="cursor:pointer;color: #f85a3e;font-size: 2.4rem;"></span>
+                            </div>
+                            <table id="families-table" class='table-styled'>
+                                <tbody style="">
+                                </tbody>
+                            </table>
+                            <div id='join-family-switch-button' class='button-styled' style='position: absolute;bottom: 7%;'>
+                                Search by ID
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Create family tab -->
+                    <div class="content-2col" id="content_create-family" style="display: none;">
+                        <div class="content-2col-col" style="justify-content: space-evenly;height: 56%;width: 42%;">
+                            <input id="create-family-name" type="text" placeholder="Name" class="input-styled" style="width: 60%;margin-right: 5%;">
+                           
+                            <select class='droplist-styled' id="country" name ="country"></select>
+                            <select class='droplist-styled' style='display:none' name ="state" id ="state"></select>
+                           
+                            <input id="create-family-phrase" type="text" placeholder="Secret Phrase" class="input-styled" style="width: 60%;margin-right: 5%;">
+                            <div id="create-family-post-button" class="button-styled" style="position: absolute;bottom: 12%;">
+                                Create family
+                            </div>
+                        </div>
+                        <div class="content-2col-col" style="justify-content: center;height: 56%;">
+                            <h5><b>Creating a new family opens a whole world of opportunities for you and your loved ones!</b></h5>
+                            <p style="font-size: 1.1rem;margin: 0;">
+                                <br>
+                                From <i> shopping lists </i> to <i>bugdeting tools</i> to <i> child SOS system</i>, Family allows you to organise your family in a modern and intuitive way!
+                            </p>
+                            <p style="font-size: 1.1rem;">
+                                <br>
+                                After creating a family, you can add members as either normal permission users or administrators so you can enjoy the features together.
+                            </p>
+                            <h5 style="margin-top: 2rem;"><b>Start today by filling the form on the left side!</b></h5>
+                        </div>
+                    </div>
+                    <!-- 			 Succesfully created family tab
+                        -->
+                    <div class="content-2col" id='content_created-family' style='display:none;'>
+                        <div class='content-2col-col'>
+                            <div id='no-family-image' style='margin-right:-20%;'>
+                                <img src="../static/images/family.png" style="width: 70%;" class="img-responsive pull-right">
+                            </div>
+                        </div>
+                        <div class='content-2col-col' style='justify-content: center;margin-right: 15%;'>
+                            <h1 style='color:#636363'>Succesfully created family!</h1>
+                            <h2 style='color:#8c8c8c'>You were automaticly added as an admin.</h2>
+                            <div id='no-family-button-container'>
+                                <div class='button-styled' id='created-family-button'>
+                                    Main Panel
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="content-2col" id="content_join-requests" style="display: none;">
+                        <div class='content-2col-col'>
+                            <h5 id="join-family-header" style="align-self: flex-start;">Family Join Requests:</h5>
+                            <p style="font-size: 1.2rem;margin-top: 10px;"> You have received these requests. Accepting them will make the user a member your family and will grant them access to your family's data. <b>Be careful who you accept!</b></p>
+                            <table id="join-requests-table" class='table-styled' style="margin-top: 0%;">
+                                <tbody style="">
+                                    <tr>
+                                        <th> ID </th>
+                                        <th> Name </th>
+                                        <th> Location </th>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div id="join-requests-delete-button" class="button-styled" style="position: absolute;bottom: 7%;">Delete all</div>
+                        </div>
+                    </div>
+                    <div class="content-2col" id="content_leave-family" style="display: none;">
+                        <div class='content-2col-col'>
+                            <h5 id="join-family-header" style="align-self: flex-start;">Leave family:</h5>
+                            <p style=";font-size: 1.3rem;margin-top: 10px;"> Select a family to leave. <b>You can ask to join back anytime!</b></p>
+                            <table id="leave-family-table" class='table-styled' style="margin-top: 0%;">
+                            </table>
+                        </div>
+                    </div>
+                    <div class="content-2col" id="content_family-reminders" style="display: none;">
+                        <div class="content-2col-col">
+                            <div class='long-input-container'>
+                                <input type="text" id='reminder-input' maxlength='140'class='long-input'>
+                                <div class='button-styled' id='reminder-add-button' style="margin-left:3%">
+                                    <h5 style="color: white;margin: 0;font-family: Arial;font-weight: bold;">Add</h5>
+                                </div>
+                            </div>
+                            <table id='reminders-table' class='table-styled'>
+                                <tr id='reminders-table-header'>
+                                    <th> Title </th>
+                                    <th> User </th>
+                                    <th> Time </th>
+                                    <th> Delete </th>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="content-2col" id="content_family-lists" style="display: none;">
+                        <div class="content-2col-col">
+                            <div class="button-styled" id="lists-create-container-button" style="align-self: flex-end;right: 2%;margin-top: 5%;margin-bottom: -10%;">
+                                <h5 style="color: white;margin: 0;font-family: Arial;font-weight: bold;font-size: 2rem;">+</h5>
+                            </div>
+                            <div class="long-input-container" id='family-lists-create-container' style="display:none;flex-direction: column;height: auto;margin-top: 8%;background-color: #2ad4ea;color: white;">
+                                <div class='flex-start-row' style='justify-content: center;'>
+                                    <input type="text" id="lists-title-input" placeholder="Title" maxlength="40" class="lists-input">
+                                </div>
+                                <div class='flex-start-row' id='family-lists-elements-container' style='margin-top:2%;flex-direction: column;'>
+                                    <h5 style="font-weight: bold;font-size: 1.3rem;margin: 5px;align-self:flex-start;margin-left:15%;">Elements:
+                                    </h5>
+                                    <input type="text" id="lists-element-input" placeholder="Element" maxlength="140" class="lists-input">
+                                </div>
+                                <div class="flex-start-row" style="justify-content: center;">
+                                    <div class="button-styled" id="lists-add-button" style="margin-top: 3%;">
+                                        <h5 style="color: white;margin: 0;font-family: Arial;font-weight: bold;font-size: 2rem;">+</h5>
+                                    </div>
+                                    <div class="button-styled" id="lists-create-button" style="margin-top: 3%;align-self: flex-end;position: absolute;right: 2%;">
+                                        <h5 style="color: white;margin: 0;font-family: Arial;font-weight: bold;font-size: 1,2rem;">Create
+                                        </h5>
+                                    </div>
+                                </div>
+                                <div class="button-styled" id="lists-close-button" style="align-self: flex-end;position: absolute;right: 2%;background-color: inherit;">
+                                    <h5 style="color: white;margin: 0;font-family: Arial;font-weight: bold;font-size: 2rem;">X</h5>
+                                </div>
+                            </div>
+                            <table id="family-lists-table" class="table-styled" style="width:120%;margin-top: 15%;">
+                                <tr>
+                                    <th> # </th>
+                                    <th> Title </th>
+                                    <th> User </th>
+                                    <th> Time </th>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="content-2col" id="content_family-calendar" style="display: none;">
+                        <!-- <div id='calendar'></div> -->
+                        <div class="content-2col-col">
+                            <div id='calendar'></div>
+                        </div>
+                        <div class="content-2col-col" id='family-event-create-wrapper' style="position: absolute;z-index: 30;top: 20%;display:none;">
+                            <div class="long-input-container" id="family-event-create-container" style="display:flex;flex-direction: column;height: auto;margin-top: 8%;background-color: #2ad4ea;color: white;">
+                                <div class="flex-start-row" style="justify-content: center;align-items: center;display: flex;position: relative;flex-direction:column;">
+                                    <h5 style="font-weight: bold;font-size: 1.3rem;margin: 5px;position: absolute;left: 20%;">Start Date:</h5>
+                                    <h4 style='margin: 0;' id='event-start-date'></h4>
+                                </div>
+                                <div class="flex-start-row" style="justify-content: center;align-items: center;display: flex;position: relative;flex-direction:column;">
+                                    <h5 style="font-weight: bold;font-size: 1.3rem;margin: 5px;position: absolute;left: 20%;">End Date:</h5>
+                                    <h4 style='margin: 0;' id='event-end-date'></h4>
+                                </div>
+                                <div class="flex-start-row" style="justify-content: center;margin-top:5%;">
+                                    <input type="text" id="event-title-input" placeholder="Title" maxlength="40" style='width:60%;' class="lists-input">
+                                </div>
+                                <div class="flex-start-row" id="family-events-elements-container" style="margin-top:2%;flex-direction: column;">
+                                    <textarea type="text" id="events-description-input" maxlength="300" class="lists-input" placeholder="Description" style='width:60%;height:auto;'></textarea>
+                                </div>
+                                <div class="flex-start-row" style="justify-content: center;">
+                                    <div class="button-styled" id="event-create-button" style="margin-top: 3%;align-self: flex-end;position: absolute;right: 2%;">
+                                        <h5 id='event-create-button-text' style="color: white;margin: 0;font-family: Arial;font-weight: bold;font-size: 1,2rem;">Create
+                                        </h5>
+                                    </div>
+                                    <div class="button-styled" id="event-delete-button" style="margin-top: 3%;align-self: flex-end;position: absolute;left: 2%;">
+                                        <h5 style="color: white;margin: 0;font-family: Arial;font-weight: bold;font-size: 1,2rem;">Delete
+                                        </h5>
+                                    </div>
+                                </div>
+                                <div class="button-styled" id="event-input-close-button" style="align-self: flex-end;position: absolute;right: 2%;background-color: inherit;">
+                                    <h5 style="color: white;margin: 0;font-family: Arial;font-weight: bold;font-size: 2rem;">X</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="content-2col" id="content_family-chat" style="display: none;">
+                        <div class="content-2col-col" style='width:80%'>
+                            <div id='family-chat-container'>
+                                <div id='family-chat-loading'>Loading..</p></div>
+                                <div id='family-chat-input-container'>
+                                    <input type="text" id='family-chat-input' maxlength='400'>
+                                    <div id='family-chat-input-send'>
+                                        <span class="icon icon-send" aria-hidden="true" style='padding-bottom: 7px;'></span>
+                                    </div>
+                                </div>
+                                <div id='family-chat-messages-container'></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="content-2col" id="content_family-cloud" style="display: none;">
+                        <div class="content-2col-col" style='width:80%'>
+							<div id='family-cloud-container'>
+								
+								<div class="long-input-container" id="family-cloud-add-container">
+									<div class="flex-start-row" style="justify-content: center;margin-top: 16%;">
+										<input id="family-file-input" type="file" name="file">
+									</div>
+									<div class="flex-start-row" style="justify-content: center;position:relative;">
+										<div class="button-styled" id="family-cloud-add-button">
+											<h5 id="event-create-button-text" style="color: white;margin: 0;font-family: Arial;font-weight: bold;font-size: 1,2rem;">
+												Upload
+											</h5>
+										</div>
+									</div>
+									<div class="button-styled" id="cloud-input-close-button" style="align-self: flex-end;position: absolute;right: 2%;background-color: inherit;">
+										<h5 style="color: white;margin: 0;font-family: Arial;font-weight: bold;font-size: 2rem;">X</h5>
+									</div>
+								</div>
+								
+								<div id='family-cloud-open-input'>
+                                    <h1 style="color: white;margin: 0;-webkit-user-select: none; /* Safari */        
+                                    -moz-user-select: none; /* Firefox */
+                                    -ms-user-select: none; /* IE10+/Edge */
+                                    user-select: none; /* Standard */">+</h1>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-2col" id="content_family-map" style="display: none;width:80%;">
+                        <div class="content-2col-col" style='width:100%;flex-direction: row;'>
+                            
+                            <div id="family-map-users-panel">
+                                <div id='family-map-users-panel-header'>
+                                   <h3 style="margin: 0;color: white;">Members</h3>
+                                </div>
+                            </div>
+
+                            <div id="family-map-checkins-panel" style='display:none;'>
+                                <div id="family-map-users-panel-header">
+                                    <h3 style="margin: 0;color: white;">Check-In's</h3>
+                                </div>
+                                <div class="family-map-checkins-panel-checkin">
+                                    <h5 style="margin: 0;">RobertTig</h5>
+                                </div>
+                                <div class="family-map-users-panel-user">
+                                    <h5 style="margin: 0;">claudiu</h5>
+                                </div>
+                                <div class="family-map-users-panel-user">
+                                    <h5 style="margin: 0;">claudiu7</h5>
+                                </div>
+                            </div>
+                             
+
+                            <div id='family-map-container'>
+                               
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div id='footer'>
+            <div id='logout-button'>
+                <h5 style="margin: 0;color: white;">Log Out</h5>
+             </div>
+             
+        </div>
+        </div>
+    </body>
+</html>
+

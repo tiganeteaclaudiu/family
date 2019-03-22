@@ -3,9 +3,9 @@ from functools import wraps
 import flask_socketio
 import json
 import datetime
-from app import app
-from app import db
-from app import socketio
+from .app import app
+from .app import db
+from .app import socketio
 import re
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -13,13 +13,11 @@ from sqlalchemy import MetaData
 from flask_socketio import SocketIO
 from flask_socketio import join_room, leave_room, send, emit
 import os
-from app.models import User,Family,Join_Request,Reminder,List,Event,Chat,ChatMessage,Cloud,File,CheckIn
+from .models import User,Family,Join_Request,Reminder,List,Event,Chat,ChatMessage,Cloud,File,CheckIn
 from random import randint
 from werkzeug.utils import secure_filename
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash, check_password_hash
-
-
 
 def logged_in(f):
 	@wraps(f)
