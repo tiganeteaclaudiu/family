@@ -19,6 +19,7 @@ menu_options = {
 		'user-menu-main-panel' : [
 				{
 					'name' : 'Join Requests',
+					'description' : 'Allow new people into your family! Remember: any loved person can be family.',
 					'link' : 'join-requests',
 					funct : function() {
 						query_join_requests();
@@ -26,14 +27,21 @@ menu_options = {
 				},
 				{
 					'name' : 'Create Family',
-					'link' : 'create-family'
+					'description' : 'Create a new family and start organising your household better!',
+					'link' : 'create-family',
+					funct: function() {
+						populateCountries("country","state");
+						// populateStates("state");
+					}
 				},
 				{
 					'name' : 'Join Family',
+					'description' : 'Not yet a member of your family? Join them today!',
 					'link' : 'join-family'
 				},
 				{
 					'name' : 'Leave Family',
+					'description' : "Don't worry, you can always join back later!",
 					'link' : 'leave-family',
 					funct: function() {
 						query_families('user','leave-family-table','/leave_family/','leave');
@@ -74,6 +82,7 @@ menu_options = {
 		'family-menu-main-panel' : [
 				{
 					'name' : 'Reminders',
+					'description' : 'Bad memory or too busy of a schedule? Now you can remember anything!',
 					'link' : 'family-reminders',
 					funct : function() {
 						console.log("MERGE FUNCTIA pt reminder!");
@@ -82,6 +91,7 @@ menu_options = {
 				},
 				{
 					'name' : 'Lists',
+					'description' : "What did you have to get again? Was it skim milk or regular milk? Now you'll know!",
 					'link' : 'family-lists',
 					funct : function() {
 						query_lists();
@@ -89,6 +99,7 @@ menu_options = {
 				},
 				{
 					'name' : 'Calendar',
+					'description' : "Busy schedule? Organise it and see it all come down as one. <b>Select one or drag across multiple days to create an event!</b>",
 					'link' : 'family-calendar',
 					funct : function() {
 						query_events();
@@ -100,6 +111,7 @@ menu_options = {
 		'family-chat-main-panel' : [
 			{
 				'name' : 'Family Chat',
+				'description' : "Keep in touch with your loved ones! Chat messages are real-time.",
 				'link' : 'family-chat',
 				funct : function() {
 					query_latest_messages();
@@ -111,6 +123,7 @@ menu_options = {
 		'family-cloud-main-panel' : [
 			{
 				'name' : 'Family Cloud',
+				'description' : "You don't have to store all those important family documents in drawers anymore!",
 				'link' : 'family-cloud',
 				funct : function() {
 					get_family_cloud_files();
@@ -122,6 +135,7 @@ menu_options = {
 		'family-map-main-panel' : [
 			{
 				'name' : 'Family Map',
+				'description' : "Press on a family member's name to see their last check-ins, or do a check-in yourself and have your loved ones know where you have been!",
 				'link' : 'family-map',
 				funct : function() {
 					init_family_map();
@@ -190,13 +204,15 @@ function load_menu_options_events(key,submenus) {
 
 		first_page = submenus[key+'-main-panel'][0]['link'];
 		first_page_funct = submenus[key+'-main-panel'][0]['funct'];
-		first_page_name = submenus[key+'-main-panel'][0]['name']
+		first_page_name = submenus[key+'-main-panel'][0]['name'];
+		first_page_description = submenus[key+'-main-panel'][0]['description'];
 		console.log('first_page: '+first_page)
 
 		show_content(first_page);
 		first_page_funct();
 
 		$("#content-header").html(first_page_name);
+		$("#content-description").html(first_page_description);
 
 		// 'family-cloud' : {
 		// 	'family-cloud-main-panel' 
@@ -262,9 +278,11 @@ function load_sidebar_options(menu_option,sidebar_option) {
 
 				name = option['name'];
 				link = option['link'];
+				description = option['description'];
 
 				console.log('name = '+name);
 				console.log('link = '+link);
+				console.log('description = '+description);
 
 				//sidebar element is created
 				element = $('<a href="' + link +'"><div class="side-menu-option">'+ name +'</div></a>');
@@ -276,6 +294,10 @@ function load_sidebar_options(menu_option,sidebar_option) {
 				if ('funct' in option) {
 					funct = option['funct'];
 					add_sidebar_funct(element,option['funct']);
+				}
+
+				if('description' in option) {
+					add_sidebar_description(element,description);
 				}
 
 			}
@@ -296,7 +318,17 @@ function add_sidebar_funct(element,funct) {
 
 	element.click(function(e) {
 		e.preventDefault();
+
 		funct();
+	});
+}
+
+function add_sidebar_description(element,description) {
+
+	element.click(function(e) {
+		e.preventDefault();
+
+		$("#content-description").html(description);
 	});
 }
 
@@ -317,7 +349,6 @@ function load_menu_links(menu, menu_option) {
 		$("#content-header").html($(this).html());
 
 		if (link in menu ) {
-			console.log("FOUND AICI ASIDA SDASDASDASDASASD" + link);
 			link2 = link;
 			$('#content_'+link2).css('display','flex');
 			load_sidebar_options(menu_option,link2);
@@ -630,30 +661,6 @@ function query_join_requests() {
 
 }
 
-
-
-function add_family_member(username,family) {
-
-	data = JSON.stringify({
-		'username' : username,
-		'family' : family
-	});
-
-	$.ajax({
-		url: '/add_family_member/',
-		method: 'POST',
-		data: data,
-		success: function(data) {
-			console.log('add_family_member success');
-			// data = JSON.parse(data);
-			// if(data['status'] === 'success') {
-			// 	window.location.href = '../index/';
-			// }
-			// else console.log("Register failed");
-		}
-	});
-
-}
 
 function load_family_droplist() {
 
@@ -1889,13 +1896,17 @@ $("#family-droplist").change(function() {
 
 });
 
+$("#country").change(function() {
+	$("#state").show();
+})
+
 
 $("#create-family-post-button").click(function(e){
 	e.preventDefault();
 	console.log('Submitted data.');
 	name = $("#create-family-name").val();
-	country = $("#create-family-country").val();
-	location_data = $("#create-family-location").val();
+	country = $("#country").val();
+	location_data = $("#state").val();
 	phrase = $("#create-family-phrase").val();
 
 
@@ -1914,7 +1925,6 @@ $("#create-family-post-button").click(function(e){
 			data = JSON.parse(data);
 			if(data['status'] === 'success') {
 				console.log('post_family success');
-				add_family_member('{{ username }}',name);
 				show_content('created-family');
 
 				set_current_family(name);

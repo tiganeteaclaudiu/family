@@ -17,6 +17,8 @@ from app.models import User,Family,Join_Request,Reminder,List,Event,Chat,ChatMes
 from random import randint
 from werkzeug.utils import secure_filename
 from sqlalchemy.exc import IntegrityError
+from werkzeug.security import generate_password_hash, check_password_hash
+
 
 
 def logged_in(f):
@@ -79,7 +81,9 @@ def post_register():
 				'message' : "Password fields don't match. Try again"
 				})
 
-		new_user = User(username=username,email=email,password=password,location=location)
+		password_hash = generate_password_hash(password)
+
+		new_user = User(username=username,email=email,password=password_hash,location=location)
 		db.session.add(new_user)
 
 		try:
@@ -128,7 +132,7 @@ def post_login():
 		user = User.query.filter_by(username=username).first()
 
 		if user is not None:
-			if user.password == password:
+			if check_password_hash(user.password,password):
 				print ('logged in')
 				session['logged_in'] = True
 				session['username'] = username
@@ -183,10 +187,13 @@ def post_family():
 		new_family = Family(name=name,country=country,location=location)
 
 		db.session.add(new_family)
-
 		db.session.flush()
-
 		print('new family id: {}'.format(new_family.id))
+
+		user = get_current_user()
+
+		#add current user as member of new family
+		new_family.members.append(user)
 
 		new_chat_room = Chat(family_id = new_family.id, room_id = new_room_id)
 
@@ -582,7 +589,7 @@ def post_reminders():
 		family_name = data['family_name']
 		username = data['username']
 		body = data['body']
-		date_time = str(datetime.datetime.now())
+		date_time = str(datetime.datetime.now().strftime("%A, %d. %B %Y %I:%M%p"))
 
 		user = User.query.filter_by(username=username).first()
 		family = Family.query.filter_by(name=family_name).first()
@@ -666,7 +673,7 @@ def post_lists():
 		family_name = data['family_name']
 		username = data['username']
 		title = data['title']
-		date_time = str(datetime.datetime.now())
+		date_time = str(datetime.datetime.now().strftime("%A, %d. %B %Y %I:%M%p"))
 		elements_json = data['elements']
 
 		user = User.query.filter_by(username=username).first()
@@ -1167,11 +1174,17 @@ def upload_cloud_file():
 
 	print('[CLOUD] Current family cloud dir: {}'.format(family_dir))
 
-	filename = secure_filename(file.filename)
+	print(1)
+
+	filename = file.filename
 	file.save(os.path.join(family_dir, filename))
+
+	print(2)
 
 	file_size = os.path.getsize(os.path.join(family_dir, filename))
 	print('[CLOUD] File size: {}'.format(file_size))
+
+	print(3)
 
 	#add file to DB
 	db_file = File(cloud_id=get_current_family_object().cloud[0].id,
@@ -1179,7 +1192,7 @@ def upload_cloud_file():
 					extension=filename.split(".")[-1],
 					size=file_size,
 					username=session['username'],
-					timestamp=str(datetime.datetime.now())
+					timestamp=str(datetime.datetime.now().strftime("%A, %d. %B %Y %I:%M%p"))
 					)
 
 	db.session.add(db_file)

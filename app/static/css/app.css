@@ -152,6 +152,14 @@ body, html {
 	font-size: 2rem;
 }
 
+#content-description { 
+	position: absolute;
+	left: 19%;
+	font-size: 1.2rem;
+	margin: 0;
+	margin-top: 8px;
+}
+
 .content-header-icon {
 	margin-right: 1%;
 	font-size: 1.5rem;
@@ -379,15 +387,20 @@ body, html {
 .droplist-styled {
 	width: auto;
 	border: 1px solit black;
-	border-radius: 15px;
-	height: 40%;
-	padding-left: 6%;
+	padding-left: 2%;
 	font-size: 1.2rem;
 	appearance: none;
 	-webkit-appearance: none;
 	-moz-appearance: none;
 	cursor: pointer;
-	padding-right: 6%;"
+	padding-right: 6%;
+	height: 41px;
+    border-radius: 6px;
+}
+
+#country, #state {
+	width: 60%;
+	margin-right: 6%;
 }
 
 #register-container {

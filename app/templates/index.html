@@ -26,6 +26,7 @@
         <link href="{{ url_for('static', filename='css/fullcalendar.print.min.css') }}" rel="stylesheet">
         <script type='text/javascript' src='{{ url_for("static", filename="js/socket.io.min.js") }}'></script>
         <script type='text/javascript' src='{{ url_for("static", filename="js/leaflet-src.js") }}'></script>
+        <script type='text/javascript' src='{{ url_for("static", filename="js/countries.js") }}'></script>
         <script>
             {% include 'app.js' %}
             
@@ -68,6 +69,7 @@
                         <span class="glyphicon glyphicon-home content-header-icon" aria-hidden="true"></span>
                         <p id='content-header'>Home</p>
                         <span class="glyphicon glyphicon-arrow-left content-header-icon" aria-hidden="true" id='content-back-button'></span>
+                        <p id="content-description"></p>
                     </div>
                     <div class="content-2col" id='content_user-menu-main-panel' style='display:none;'>
                         <div class='content-2col-col'>
@@ -135,8 +137,10 @@
                     <div class="content-2col" id="content_create-family" style="display: none;">
                         <div class="content-2col-col" style="justify-content: space-evenly;height: 56%;width: 42%;">
                             <input id="create-family-name" type="text" placeholder="Name" class="input-styled" style="width: 60%;margin-right: 5%;">
-                            <input id="create-family-country" type="text" placeholder="Country" class="input-styled" style="width: 60%;margin-right: 5%;">
-                            <input id="create-family-location" type="text" placeholder="Location" class="input-styled" style="width: 60%;margin-right: 5%;">
+                           
+                            <select class='droplist-styled' id="country" name ="country"></select>
+                            <select class='droplist-styled' style='display:none' name ="state" id ="state"></select>
+                           
                             <input id="create-family-phrase" type="text" placeholder="Secret Phrase" class="input-styled" style="width: 60%;margin-right: 5%;">
                             <div id="create-family-post-button" class="button-styled" style="position: absolute;bottom: 12%;">
                                 Create family
@@ -255,8 +259,6 @@
                     <div class="content-2col" id="content_family-calendar" style="display: none;">
                         <!-- <div id='calendar'></div> -->
                         <div class="content-2col-col">
-                            <h5 id="join-family-header" style="align-self: flex-start;">Calendar
-                            </h5>
                             <div id='calendar'></div>
                         </div>
                         <div class="content-2col-col" id='family-event-create-wrapper' style="position: absolute;z-index: 30;top: 20%;display:none;">
