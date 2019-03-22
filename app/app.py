@@ -56,5 +56,4 @@ print('CURRENT WORKING DIR: {}'.format(os.getcwd()))
 from . import routes
 
 if __name__ == "__main__":
-
-	app.run()
+	socketio.run(app)
