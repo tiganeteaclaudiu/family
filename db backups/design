@@ -1,0 +1,21 @@
+Page design:
+
+Includes design of main UI, login/register pages, etc.
+
+UI:
+
+	-Main page (index):
+		-home page:
+
+			CONTENT:
+				-if user is not a member of a family:
+					-either create family or join one
+				-if user already is a member of a family:
+					-first page contains notifications, reminders, alerts etc
+
+			SIDE MENU TABS: 
+				-main page
+				-reminders
+				-lists
+				-budgeting
+				-events (calendar)

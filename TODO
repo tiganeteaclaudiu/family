@@ -1,9 +1,43 @@
 TODO:
 
--IMPLEMENT DATABASE AT BASIC LEVEL
+-IMPLEMENT DATABASE AT BASIC LEVEL -- DONE
 -USER REGISTRATION PAGE
 -LOGIN PAGE
--LOGIN SYSTEM USING EITHER FLASK-LOGIN OR OWN METHOD
--EXPAND DATABASE WITH NECESARY FIELDS
--START IMPLEMENTING MAIN UI FEATURES
+-LOGIN SYSTEM USING EITHER FLASK-LOGIN OR OWN METHOD --DONE
+-EXPAND DATABASE WITH NECESARY FIELDS  --DONE
+-START IMPLEMENTING MAIN UI FEATURES  --DONE
 
+TODO: 1DEC:
+	- SIDE MENU -- DONE
+	- IMPLEMENT BETTER SYSTEM FOR TABS (LIKE IN ITRON-WEB-DM)
+	- IMPLEMENT JOIN REQUESTS FOR FAMILIES
+	-
+
+TODO: 9 MARCH:
+
+	- test whole family system again
+
+	- Calendar:
+		- make db models
+		- make event input window
+		- make set/get event methods, both server and client
+		- make event update window
+		- make delete event methods on both server and client
+
+WHAT I DID: 9 MARCH
+
+	-reminder delete checkbox
+	-list delete button
+	-list reset element inputs on clicking close button
+
+WHAT I DID: 10 MARCH:
+
+	-finished and tested Calendar
+	-added delete and update to calendar events
+
+TODO: 10 MARCH:
+
+	- update for lists
+	- begin on next feature
+	- test whole family system IMPORTANT
+	- update teacher on progress
