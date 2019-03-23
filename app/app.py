@@ -50,8 +50,8 @@ socketio = SocketIO(app)
 # except Exception as e:
 # 	print(e)
 
-from . import routes
+from .routes import *
 
 if __name__ == "__main__":
-	app.run()
+	socketio.run(app)
 
